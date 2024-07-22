@@ -36,7 +36,6 @@ class RepositoryTraverser:
             filenames[:] = [f for f in filenames if not should_ignore(os.path.join(dirpath, f))]
 
             folder = os.path.relpath(dirpath, self._repo_path)
-            folder_structure[folder] = []
 
             for filename in filenames:
                 file_path = os.path.join(dirpath, filename)
@@ -46,6 +45,7 @@ class RepositoryTraverser:
                         chunks = self._embedder.split_text_into_chunks(content, max_tokens)
                         embeddings = [self._embedder.generate_embeddings(chunk) for chunk in chunks]
 
+                        folder_structure[folder] = []
                         folder_structure[folder].append({
                             'file_name': filename,
                             'content': content,

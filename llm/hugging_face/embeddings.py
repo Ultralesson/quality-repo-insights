@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer
 from llm.contracts import EmbeddingContract
 from transformers import AutoTokenizer
+import numpy as np
 
 
 class HuggingFaceEmbedding(EmbeddingContract):
@@ -13,7 +14,13 @@ class HuggingFaceEmbedding(EmbeddingContract):
         """
         Generates embeddings for the given text using Sentence Transformer.
         """
-        return self._embedding_model.encode(text)
+        embedding = self._embedding_model.encode(text)
+        embedding = np.array(embedding)
+
+        if embedding.ndim != 1:
+            raise ValueError(f"Expected 1D array for embedding, but got shape: {format(embedding.shape)}")
+
+        return embedding
 
     def split_text_into_chunks(self, text, max_tokens=512):
         """

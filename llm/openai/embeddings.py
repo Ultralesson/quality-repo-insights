@@ -1,23 +1,27 @@
 from llm.contracts import EmbeddingContract
 from openai import OpenAI
+from dotenv import load_dotenv, find_dotenv
+import numpy as np
 
-client = OpenAI()
+load_dotenv(find_dotenv())
 
 
 class OpenAIEmbedding(EmbeddingContract):
-    def __init__(self, model):
+    def __init__(self, model='text-embedding-3-small'):
         self._model = model
+        self._client = OpenAI()
 
     def generate_embeddings(self, text):
         """
         Generates embeddings for the given text using OpenAI's API.
         """
-        response = client.embeddings.create(
+        response = self._client.embeddings.create(
             input=text,
-            model=self._model
+            model=self._model,
+            encoding_format="float"
         )
 
-        return response.data[0].embedding
+        return np.array(response.data[0].embedding)
 
     def split_text_into_chunks(self, text, max_tokens=2048):
         """
