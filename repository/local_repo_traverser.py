@@ -1,9 +1,10 @@
 import fnmatch
 import os
+from llm.contracts import EmbeddingContract
 
 
-class RepositoryTraverser:
-    def __init__(self, repo_path, embedder):
+class LocalRepoTraverser:
+    def __init__(self, repo_path: str, embedder: EmbeddingContract):
         self._repo_path = repo_path
         self._embedder = embedder
 
@@ -49,6 +50,7 @@ class RepositoryTraverser:
                         folder_structure[folder].append({
                             'file_name': filename,
                             'content': content,
+                            'chunks': chunks,
                             'embeddings': embeddings
                         })
                 except Exception as e:

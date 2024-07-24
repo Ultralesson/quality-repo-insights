@@ -1,1 +1,1 @@
-from .embeddings import OpenAIEmbedding
+from .cluster_reviewer import ClusterReviewer
