@@ -1,12 +1,12 @@
 from typing import Dict
 
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.runnables.history import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_message_histories import ChatMessageHistory
 
 from code_review.parsers import CodeReviewSummary, ClusterSummary
-from code_review.prompts.code_review_prompts import GENERAL_SUMMARIZATION_PROMPT, FORMATTED_SUMMARY_PROMPT
+from code_review.prompts.cluster_review_prompt import CLUSTER_FILES_SUMMARIZATION_PROMPT
+import json
 
 
 class ClusterReviewsSummarizer:
@@ -20,46 +20,23 @@ class ClusterReviewsSummarizer:
 
         for cluster_id, cluster_files_reviews in clusters.items():
             for file_name, review in cluster_files_reviews.items():
+                review_str = json.dumps(review.model_dump(exclude_none=True, exclude_unset=True))
                 summary_history.add_user_message(
-                    f"# File Name: {file_name}\n\n# Review:\n{review.to_string()}"
+                    f"# File Name: {file_name}\n\n# Review:\n{review_str}"
                 )
 
-            summarization_chain = GENERAL_SUMMARIZATION_PROMPT | self.__llm
+            summarization_chain = CLUSTER_FILES_SUMMARIZATION_PROMPT | self.__llm | self.__summary_parser
 
             try:
-                summary_message = await summarization_chain.ainvoke({"chat_history": summary_history.messages})
-            except Exception as e:
-                print(f"Error summarizing cluster reviews: {str(e)}")
-                summary_message = "Error summarizing cluster reviews: {str(e)}"
-
-            cluster_summary_chain = (
-                    RunnablePassthrough.assign(
-                        format_instructions=lambda _: self.__summary_parser.get_format_instructions()
-                    )
-                    | FORMATTED_SUMMARY_PROMPT
-                    | self.__llm
-                    | self.__summary_parser
-            )
-
-            try:
-                cluster_summary: ClusterSummary = await cluster_summary_chain.ainvoke(
-                    {"summary_message": summary_message},
+                summary: ClusterSummary = await summarization_chain.ainvoke(
+                    {
+                        "chat_history": summary_history.messages,
+                        "format_instructions": self.__summary_parser.get_format_instructions()
+                    }
                 )
 
+                cluster_summaries[cluster_id] = summary
             except Exception as e:
-                print(f"Error summarizing cluster reviews: {str(e)}")
-                cluster_summary = ClusterSummary(
-                    main_theme="Error occurred while summarizing this cluster",
-                    key_components=[str(e)],
-                    tools_and_frameworks="Error",
-                    code_quality="Error",
-                    best_practices="Error",
-                    common_issues=["Error"],
-                    maintainability="Error",
-                    recommendations=["Error"],
-                    complexity_assessment="Error"
-                )
-
-            cluster_summaries[cluster_id] = cluster_summary
+                raise Exception(f"Error summarizing cluster reviews: {str(e)}")
 
         return cluster_summaries

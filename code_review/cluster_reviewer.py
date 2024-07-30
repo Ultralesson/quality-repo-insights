@@ -17,13 +17,10 @@ class ClusterReviewer:
         self._file_reviewer = FileReviewer(model)
         self._summary_parser = PydanticOutputParser(pydantic_object=ClusterSummary)
         self.__executor = ThreadPoolExecutor()
-        self._llm = ChatOpenAI(
-            model=model,
-            temperature=0.7
-        )
+        self._llm = ChatOpenAI(model=model, temperature=0.7)
 
-    async def review_all_clusters(self, clusters: Dict[str, List[Dict[str, Dict]]]) -> Dict[
-        str, Dict[str, CodeReviewSummary]]:
+    async def review_all_clusters(self, clusters: Dict[str, List[Dict[str, Dict]]]) -> \
+            Dict[str, Dict[str, CodeReviewSummary]]:
         cluster_reviews = {}
         tasks = []
 

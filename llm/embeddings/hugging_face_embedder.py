@@ -22,10 +22,10 @@ class HuggingFaceEmbedding(EmbeddingContract):
 
         return embedding
 
-    def split_text_into_chunks(self, text, max_tokens=512):
+    def split_text_into_chunks(self, text, max_tokens=510):
         """
         Splits the text into chunks of approximate size based on max_tokens.
         """
-        tokens = self._tokenizer.encode(text)
+        tokens = self._tokenizer.encode(text, add_special_tokens=False)
         chunks = [tokens[i:i + max_tokens] for i in range(0, len(tokens), max_tokens)]
         return [self._tokenizer.decode(chunk) for chunk in chunks]
