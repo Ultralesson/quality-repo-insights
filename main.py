@@ -12,6 +12,7 @@ from code_review.cluster_reviewer import ClusterReviewer
 from database.supabase.clients.repository_table_client import RepositoryTableClient
 import asyncio
 import os
+import json
 
 load_dotenv(find_dotenv())
 
@@ -55,6 +56,8 @@ async def main():
     # Final Review
     final_review = await RepoFeedbackSummarizer().summarize_feedback(clusters_summaries)
     supabase_data_client.add_overall_review_to_db(final_review)
+    print('Final Review:\n\n')
+    print(json.dumps(final_review.model_dump(exclude_none=True, exclude_unset=True)))
 
 
 if __name__ == '__main__':

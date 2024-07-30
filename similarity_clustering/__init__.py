@@ -1,1 +1,1 @@
-from .cluster_files import FileClusterer
+from .file_clusterer import FileClusterer
