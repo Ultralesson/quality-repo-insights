@@ -1,4 +1,15 @@
-JAVA_IGNORE_PATTERNS = [
+IGNORE_PATTERNS = [
+    # Git
+    ".git",
+    # Intellij
+    'out', '.idea', '.idea_modules', '*.iml', '*.ipr', '*.iws',
+    # vscode
+    '.vscode', '.code-workspace',
+    # OSX
+    '.DS_Store',
+    # Misc
+    '*.log'
+
     # Java
     'hs_prr_eid*', 'replay_eid*',
     # Maven
@@ -10,4 +21,13 @@ JAVA_IGNORE_PATTERNS = [
     'local.properties', '.loadpath', 'factorypath',
     # NetBeans
     'nbproject/private', 'nbbuild/', 'nbdist/', 'nbactions.xml', 'nb-configuration.xml',
+    # All System generated files
+    '.*',
+
+    # Typescript/ Javascript
+    'lib-cov', 'pids', 'logs', 'results', 'tmp', 'coverage', 'dist', 'node_modules'
+
+    # Python
+                                                                     '.venv', '__pycache__', 'develop-eggs', 'var',
+    '*.txt', '*.pit', 'sdist', 'parts'
 ]

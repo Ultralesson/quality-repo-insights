@@ -1,3 +1,3 @@
-from .codebert_embeddings import CodeBertEmbedding
-from .open_ai_embeddings import OpenAIEmbedding
-from .hugging_face_embeddings import HuggingFaceEmbedding
+from .codebert_embedder import CodeBertEmbedder
+from .open_ai_embedder import OpenAIEmbedding
+from .hugging_face_embedder import HuggingFaceEmbedding

@@ -1,3 +1,2 @@
 from .local_repo_traverser import LocalRepoTraverser
-from .ignore_patterns.java_ignore_patterns import JAVA_IGNORE_PATTERNS
-from .ignore_patterns.common_ignore_patterns import COMMON_IGNORE_PATTERNS
+from .ignore_patterns.ignore_patterns import IGNORE_PATTERNS

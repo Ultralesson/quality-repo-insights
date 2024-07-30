@@ -4,12 +4,23 @@ from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTempla
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
-from llm.openai.parsers.code_review_summary import CodeReviewSummary
+from code_review.parsers.code_review_summary import CodeReviewSummary
 from langchain.schema.runnable import RunnablePassthrough
 
-from dotenv import load_dotenv, find_dotenv
+SYSTEM_MESSAGE_TEMPLATE = """
+You are an expert code reviewer. Provide a brief summary of the code in the following format:
+{format_instructions}
+"""
 
-load_dotenv(find_dotenv())
+HUMAN_MESSAGE_TEMPLATE = """
+Please review the code segments i've provided in the chat history. File Name of the code segments is {file_name}.
+"""
+
+FILE_REVIEW_INPUT = """
+Based on the code segments in the chat history, provide a comprehensive summary of the file.
+Focus on identifying the main purpose, key points, tools usage, file name matching, and implementation details.
+Don't expect Unit Tests in the code. Ensure your review covers all aspects required by the output format. 
+"""
 
 
 class FileReviewer:
@@ -20,19 +31,13 @@ class FileReviewer:
 
     async def review_file(self, file_name: str, chunks: List[str]) -> CodeReviewSummary:
         history = InMemoryChatMessageHistory()
+
         for chunk in chunks:
             history.add_user_message(chunk)
 
         prompt = ChatPromptTemplate.from_messages([
-            SystemMessagePromptTemplate.from_template(
-                """
-                You are an expert code reviewer. Provide a brief summary of the code in the following format:
-                {format_instructions}
-                """
-            ),
-            HumanMessagePromptTemplate.from_template(
-                f"File Name: {file_name}. \n Please review the code segments I've provided in the chat history."
-            )
+            SystemMessagePromptTemplate.from_template(SYSTEM_MESSAGE_TEMPLATE),
+            HumanMessagePromptTemplate.from_template(HUMAN_MESSAGE_TEMPLATE)
         ])
 
         chain = (
@@ -45,7 +50,7 @@ class FileReviewer:
                 | self._parser
         )
 
-        wrapped_chain = RunnableWithMessageHistory(
+        chain_with_chat_history = RunnableWithMessageHistory(
             runnable=chain,
             get_session_history=lambda _: history,
             input_messages_key="input",
@@ -53,26 +58,25 @@ class FileReviewer:
         )
 
         try:
-            file_review: CodeReviewSummary = await wrapped_chain.ainvoke(
-                {
-                    "input": """
-                                Based on the code segments in the chat history, provide a comprehensive summary of the file. 
-                                Focus on identifying the main purpose, key points, tools usage, file name matching, and 
-                                implementation details. Ensure your review covers all aspects required by the output format. 
-                                Don't expect Unit Tests as this is intended for e2e tests.
-                                """
-                },
+            file_review: CodeReviewSummary = await chain_with_chat_history.ainvoke(
+                input={"input": FILE_REVIEW_INPUT},
                 config={"configurable": {"session_id": file_name}}
             )
 
         except Exception as e:
             print(f"Error reviewing {file_name}: {str(e)}")
+
             file_review = CodeReviewSummary(
                 main_purpose=f"Error Reviewing: {str(e)}",
                 key_points="Error",
-                tool_usage="Error",
-                file_name_matching="Error",
-                implementation_details="Error"
+                file_type="Error",
+                tools_and_libraries=[{"Error": str(e)}],
+                code_quality=[{"Error": str(e)}],
+                best_practices=["Error"],
+                maintainability="Error",
+                file_organization="Error",
+                recommendations=["Error"],
+                complexity_assessment=[{"Error": str(e)}]
             )
 
         return file_review

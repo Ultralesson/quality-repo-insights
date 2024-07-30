@@ -1,6 +1,6 @@
-import fnmatch
 import os
 from llm.contracts import EmbeddingContract
+from repository.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
 
 
 class LocalRepoTraverser:
@@ -8,7 +8,8 @@ class LocalRepoTraverser:
         self._repo_path = repo_path
         self._embedder = embedder
 
-    def extract_folder_structure_and_contents(self, ignore_patterns, max_tokens=512):
+    def extract_folder_structure_and_contents(self, max_tokens=512):
+        ignore_patterns = IGNORE_PATTERNS
         folder_structure = {}
 
         def should_ignore(path):

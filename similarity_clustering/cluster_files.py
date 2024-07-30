@@ -6,9 +6,7 @@ from sklearn.metrics import silhouette_score
 from collections import defaultdict
 
 
-class ClusterFiles:
-    def __init__(self, folder_structure):
-        self._folder_structure = folder_structure
+class FileClusterer:
 
     @staticmethod
     def __find_optimal_clusters(embeddings, max_clusters=20):
@@ -31,19 +29,22 @@ class ClusterFiles:
 
         return best_k
 
-    def cluster_files(self) -> Dict[str, List[Dict[str, List[str]]]]:
+    def cluster_files(self, folder_structure: Dict[str, list]) -> Dict[str, List[Dict[str, Dict]]]:
         file_names = []
         embeddings = []
 
-        file_chunks_dict = {}
+        file_contents_dict = {}
 
         # Collect embeddings and file names
-        for folder, files in self._folder_structure.items():
+        for folder, files in folder_structure.items():
             for file_info in files:
                 file_name = f'{folder}/{file_info['file_name']}'
                 file_names.append(file_name)
 
-                file_chunks_dict[file_name] = file_info['chunks']
+                file_contents_dict[file_name] = {
+                    'chunks': file_info['chunks'],
+                    'content': file_info['content']
+                }
 
                 embedding = np.array(file_info['embeddings'])
                 if embedding.size > 0:
@@ -76,7 +77,7 @@ class ClusterFiles:
         clustered_files = defaultdict(list)
         for file_name, label in zip(file_names, labels):
             clustered_files[int(label)].append({
-                file_name: file_chunks_dict[file_name]
+                file_name: file_contents_dict[file_name]
             })
 
         return dict(clustered_files)

@@ -15,6 +15,7 @@ sentence-transformers = "*"
 transformers = "*"
 torch = "*"
 scikit-learn = "*"
+supabase = "*"
 
 [dev-packages]
 

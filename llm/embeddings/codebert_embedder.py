@@ -1,12 +1,9 @@
-from numbers import Number
-from typing import List
-
 from transformers import AutoTokenizer, AutoModel
 from llm.contracts import EmbeddingContract
 import torch
 
 
-class CodeBertEmbedding(EmbeddingContract):
+class CodeBertEmbedder(EmbeddingContract):
     def __init__(self, model='microsoft/codebert-base'):
         self._tokenizer = AutoTokenizer.from_pretrained(model)
         self._model = AutoModel.from_pretrained(model)
