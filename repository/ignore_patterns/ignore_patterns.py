@@ -8,7 +8,7 @@ IGNORE_PATTERNS = [
     # OSX
     '.DS_Store',
     # Misc
-    '*.log'
+    '*.log', '*.lock',
 
     # Java
     'hs_prr_eid*', 'replay_eid*',
@@ -25,9 +25,8 @@ IGNORE_PATTERNS = [
     '.*',
 
     # Typescript/ Javascript
-    'lib-cov', 'pids', 'logs', 'results', 'tmp', 'coverage', 'dist', 'node_modules'
+    'lib-cov', 'pids', 'logs', 'results', 'tmp', 'coverage', 'dist', 'node_modules',
 
     # Python
-                                                                     '.venv', '__pycache__', 'develop-eggs', 'var',
-    '*.txt', '*.pit', 'sdist', 'parts'
+    '.venv', '__pycache__', 'develop-eggs', 'var', '*.txt', '*.pit', 'sdist', 'parts', '__init__.py'
 ]

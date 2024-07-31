@@ -29,28 +29,25 @@ class FileClusterer:
 
         return best_k
 
-    def cluster_files(self, folder_structure: Dict[str, list]) -> Dict[str, List[Dict[str, Dict]]]:
+    def cluster_files(self, folder_structure: Dict[str, Dict]) -> Dict[str, List[Dict[str, Dict]]]:
         file_names = []
         embeddings = []
 
         file_contents_dict = {}
 
         # Collect embeddings and file names
-        for folder, files in folder_structure.items():
-            for file_info in files:
-                file_name = f'{folder}/{file_info['file_name']}'
-                file_names.append(file_name)
+        for file_name, file_info in folder_structure.items():
+            file_names.append(file_name)
+            file_contents_dict[file_name] = {
+                'chunks': file_info['chunks'],
+                'content': file_info['content']
+            }
 
-                file_contents_dict[file_name] = {
-                    'chunks': file_info['chunks'],
-                    'content': file_info['content']
-                }
-
-                embedding = np.array(file_info['embeddings'])
-                if embedding.size > 0:
-                    embeddings.append(embedding)
-                else:
-                    print(f"Skipping empty embedding for file: {file_name}")
+            embedding = np.array(file_info['embeddings'])
+            if embedding.size > 0:
+                embeddings.append(embedding)
+            else:
+                print(f"Skipping empty embedding for file: {file_name}")
 
         try:
             max_length = max(e.shape[0] for e in embeddings)

@@ -6,8 +6,8 @@ This project leverages AI to review any code repository. It traverses the reposi
 
 ## Approach
 
-1. **Repository Traversal**: The `RepoTraverser` class ignores files and directories specified in `ignore_patterns` and returns the folder structure with relevant details. It includes:
-   - `folder_structure`: A dictionary with folders as keys and file names, chunks, and embeddings as values.
+1. **Repository Traversal**: The `traverser` class ignores files and directories specified in `ignore_patterns` and returns the folder structure with relevant details. It includes:
+   -  A dictionary with folders as keys and file names, chunks, and embeddings as values.
    - **Chunking & Embeddings**: Utilizes CodeBERT for generating embeddings and chunking code files.
 
 

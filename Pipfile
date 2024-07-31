@@ -16,6 +16,9 @@ transformers = "*"
 torch = "*"
 scikit-learn = "*"
 supabase = "*"
+pygithub = "*"
+langchain-community = "*"
+requests = "*"
 
 [dev-packages]
 
