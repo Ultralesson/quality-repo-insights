@@ -1,12 +1,12 @@
 import os
-from llm.contracts import EmbeddingContract
-from repository.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
-from repository.traverser import Traverser
+
+from repo_traverser.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
+from repo_traverser.traverser import Traverser
 
 
 class LocalRepoTraverser(Traverser):
-    def __init__(self, repo_path: str, embedder: EmbeddingContract):
-        self._repo_path = repo_path
+    def __init__(self, repo_path: str, embedder):
+        self._repo_path = repo_path if repo_path.endswith('/') else f"{repo_path}/"
         self._embedder = embedder
 
     def extract_folder_structure_and_contents(self, max_tokens=512):
@@ -25,7 +25,7 @@ class LocalRepoTraverser(Traverser):
 
             for filename in filenames:
                 file_path = os.path.join(dirpath, filename)
-                rel_file_name = os.path.relpath(file_path)
+                rel_file_name = os.path.normpath(file_path.split(self._repo_path)[-1])
 
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:

@@ -1,13 +1,13 @@
 import fnmatch
+import re
 from collections import deque
 
 from github import Github, Auth
-import re
 
 from config import GITHUB_ACCESS_TOKEN
-from llm.contracts import EmbeddingContract
-from repository.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
-from repository.traverser import Traverser
+from llm.embeddings.embedding_contract import EmbeddingContract
+from repo_traverser.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
+from repo_traverser.traverser import Traverser
 
 
 class GitHubTraverser(Traverser):

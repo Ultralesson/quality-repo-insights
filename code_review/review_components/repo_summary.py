@@ -4,7 +4,7 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 
-from code_review.parsers import ClusterSummary, OverallSummary
+from code_review.parsers import OverallSummary
 from code_review.prompts import OVERALL_SUMMARY_PROMPT
 import json
 
@@ -14,10 +14,11 @@ class RepoFeedbackSummarizer:
         self.__llm = ChatOpenAI(model=model, temperature=0.7)
         self.__parser = PydanticOutputParser(pydantic_object=OverallSummary)
 
-    async def summarize_feedback(self, cluster_reviews: Dict[str, ClusterSummary]):
+    async def summarize_feedback(self, cluster_reviews: Dict[str, Dict]):
         cluster_summaries_history = ChatMessageHistory()
 
-        for cluster, cluster_summary in cluster_reviews.items():
+        for cluster, cluster_info in cluster_reviews.items():
+            cluster_summary = cluster_info['summary']
             cluster_summaries_history.add_user_message(json.dumps(
                 cluster_summary.model_dump(
                     exclude_none=True,

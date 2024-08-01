@@ -1,8 +1,7 @@
 import threading
 from typing import Dict, List
 
-from code_review import CodeReviewSummary, ClusterSummary
-from code_review import OverallSummary
+from code_review.parsers import CodeReviewSummary, OverallSummary
 from database.supabase.clients import ClusterTableClient, FileInfoTableClient, RepositoryTableClient
 from database.supabase.models import Cluster, FileInfo, Repository
 
@@ -67,11 +66,11 @@ class SupabaseDataClient:
                         )
                         break
 
-    def add_cluster_summary_to_db(self, cluster_summaries: Dict[str, ClusterSummary]):
-        for cluster_name, summary in cluster_summaries.items():
+    def add_cluster_summary_to_db(self, cluster_summaries: Dict[str, Dict]):
+        for cluster_name, cluster_info in cluster_summaries.items():
             cluster_id = self.__cluster_db_data[cluster_name]['cluster_id']
             self.__cluster_table_client.update_cluster(
-                data=Cluster(feedback_summary=summary),
+                data=Cluster(feedback_summary=cluster_info['summary']),
                 cluster_id=cluster_id
             )
 

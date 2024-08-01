@@ -11,6 +11,7 @@ parts/
 sdist/
 var/
 .idea/
+review_output/
 
 *.py[cod]
 *.manifest

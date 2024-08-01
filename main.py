@@ -1,5 +1,4 @@
-import requests
-
+from code_review.review_formatter.review_to_md import ReviewToMd
 from database.supabase import SupabaseDataClient
 from database.supabase.models import Repository
 from repo_traverser import LocalRepoTraverser, GitHubTraverser
@@ -10,8 +9,6 @@ from clustering import SimilarFilesClusterer
 from code_review.review_components import ClusterReviewer, ClusterReviewsSummarizer, RepoFeedbackSummarizer
 from database.supabase.clients import RepositoryTableClient
 import asyncio
-import os
-import json
 
 from user_interactions import RepoDetailsUserInteractions
 
@@ -47,8 +44,11 @@ async def main():
     # Final Review
     final_review = await RepoFeedbackSummarizer().summarize_feedback(clusters_summaries)
     supabase_data_client.add_overall_review_to_db(final_review)
-    print('Final Review:\n\n')
-    print(json.dumps(final_review.model_dump(exclude_none=True, exclude_unset=True)))
+
+    review_formatter = ReviewToMd()
+    review_formatter.format_overall_review(final_review)
+    review_formatter.format_cluster_summaries(clusters_summaries)
+    review_formatter.format_file_reviews(cluster_file_reviews)
 
 
 def __get_traverser(repo_type, repo_path, embedder=CodeBertEmbedder()):

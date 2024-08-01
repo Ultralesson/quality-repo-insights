@@ -15,13 +15,15 @@ class ClusterReviewsSummarizer:
         self.__llm = ChatOpenAI(model=model, temperature=0.7)
         self.__summary_parser = PydanticOutputParser(pydantic_object=ClusterSummary)
 
-    async def summarize_cluster(self, clusters: Dict[str, Dict[str, CodeReviewSummary]]) -> Dict[str, ClusterSummary]:
+    async def summarize_cluster(self, clusters: Dict[str, Dict[str, CodeReviewSummary]]) -> Dict[str, Dict]:
         cluster_summaries = {}
         summary_history = ChatMessageHistory()
 
         for cluster_id, cluster_files_reviews in clusters.items():
+            cluster_files = []
             for file_name, review in cluster_files_reviews.items():
                 review_str = json.dumps(review.model_dump(exclude_none=True, exclude_unset=True))
+                cluster_files.append(file_name)
                 summary_history.add_user_message(
                     f"# File Name: {file_name}\n\n# Review:\n{review_str}"
                 )
@@ -36,7 +38,10 @@ class ClusterReviewsSummarizer:
                     }
                 )
 
-                cluster_summaries[cluster_id] = summary
+                cluster_summaries[cluster_id] = {
+                    'summary': summary,
+                    'files': cluster_files
+                }
             except Exception as e:
                 raise Exception(f"Error summarizing cluster reviews: {str(e)}")
 

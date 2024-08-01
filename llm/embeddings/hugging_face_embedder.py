@@ -1,5 +1,5 @@
 from sentence_transformers import SentenceTransformer
-from llm.contracts import EmbeddingContract
+from llm.embeddings.embedding_contract import EmbeddingContract
 from transformers import AutoTokenizer
 import numpy as np
 

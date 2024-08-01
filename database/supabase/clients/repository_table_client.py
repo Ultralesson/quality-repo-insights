@@ -6,7 +6,7 @@ from database.supabase.models.repository import Repository
 
 class RepositoryTableClient(DataRepository[Repository]):
     def __init__(self):
-        super().__init__('repo_traverser')
+        super().__init__('repository')
 
     def add_repository(self, data: Repository) -> List[Repository]:
         response = self.get_repository(data.url)
