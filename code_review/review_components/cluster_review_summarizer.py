@@ -11,36 +11,42 @@ import json
 
 
 class ClusterReviewsSummarizer:
-    def __init__(self, model='gpt-4o-mini'):
+    def __init__(self, model="gpt-4o-mini"):
         self.__llm = ChatOpenAI(model=model, temperature=0.7)
         self.__summary_parser = PydanticOutputParser(pydantic_object=ClusterSummary)
 
-    async def summarize_cluster(self, clusters: Dict[str, Dict[str, CodeReviewSummary]]) -> Dict[str, Dict]:
+    async def summarize_cluster(
+        self, clusters: Dict[str, Dict[str, CodeReviewSummary]]
+    ) -> Dict[str, Dict]:
         cluster_summaries = {}
         summary_history = ChatMessageHistory()
 
         for cluster_id, cluster_files_reviews in clusters.items():
             cluster_files = []
             for file_name, review in cluster_files_reviews.items():
-                review_str = json.dumps(review.model_dump(exclude_none=True, exclude_unset=True))
+                review_str = json.dumps(
+                    review.model_dump(exclude_none=True, exclude_unset=True)
+                )
                 cluster_files.append(file_name)
                 summary_history.add_user_message(
                     f"# File Name: {file_name}\n\n# Review:\n{review_str}"
                 )
 
-            summarization_chain = CLUSTER_FILES_SUMMARIZATION_PROMPT | self.__llm | self.__summary_parser
+            summarization_chain = (
+                CLUSTER_FILES_SUMMARIZATION_PROMPT | self.__llm | self.__summary_parser
+            )
 
             try:
                 summary: ClusterSummary = await summarization_chain.ainvoke(
                     {
                         "chat_history": summary_history.messages,
-                        "format_instructions": self.__summary_parser.get_format_instructions()
+                        "format_instructions": self.__summary_parser.get_format_instructions(),
                     }
                 )
 
                 cluster_summaries[cluster_id] = {
-                    'summary': summary,
-                    'files': cluster_files
+                    "summary": summary,
+                    "files": cluster_files,
                 }
             except Exception as e:
                 raise Exception(f"Error summarizing cluster reviews: {str(e)}")

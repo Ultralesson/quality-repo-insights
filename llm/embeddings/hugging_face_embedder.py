@@ -1,12 +1,12 @@
 from sentence_transformers import SentenceTransformer
-from llm.embeddings.embedding_contract import EmbeddingContract
+from llm.embeddings import EmbeddingContract
 from transformers import AutoTokenizer
 import numpy as np
 
 
 class HuggingFaceEmbedder(EmbeddingContract):
 
-    def __init__(self, model='sentence-transformers/all-MiniLM-L6-v2'):
+    def __init__(self, model="sentence-transformers/all-MiniLM-L6-v2"):
         self._embedding_model = SentenceTransformer(model)
         self._tokenizer = AutoTokenizer.from_pretrained(model)
 
@@ -18,7 +18,9 @@ class HuggingFaceEmbedder(EmbeddingContract):
         embedding = np.array(embedding)
 
         if embedding.ndim != 1:
-            raise ValueError(f"Expected 1D array for embedding, but got shape: {format(embedding.shape)}")
+            raise ValueError(
+                f"Expected 1D array for embedding, but got shape: {format(embedding.shape)}"
+            )
 
         return embedding
 
@@ -27,5 +29,5 @@ class HuggingFaceEmbedder(EmbeddingContract):
         Splits the text into chunks of approximate size based on max_tokens.
         """
         tokens = self._tokenizer.encode(text, add_special_tokens=False)
-        chunks = [tokens[i:i + max_tokens] for i in range(0, len(tokens), max_tokens)]
+        chunks = [tokens[i : i + max_tokens] for i in range(0, len(tokens), max_tokens)]
         return [self._tokenizer.decode(chunk) for chunk in chunks]

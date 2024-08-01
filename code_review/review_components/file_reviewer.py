@@ -9,7 +9,7 @@ from code_review.prompts import FILE_REVIEW_PROMPT
 
 
 class FileReviewer:
-    def __init__(self, model='gpt-4o-mini'):
+    def __init__(self, model="gpt-4o-mini"):
         self._model = model
         self._llm = ChatOpenAI(model=model, temperature=0.7)
         self._parser = PydanticOutputParser(pydantic_object=CodeReviewSummary)
@@ -26,16 +26,16 @@ class FileReviewer:
             runnable=chain,
             get_session_history=lambda _: history,
             input_messages_key="input",
-            history_messages_key="history"
+            history_messages_key="history",
         )
 
         try:
             file_review: CodeReviewSummary = await chain_with_chat_history.ainvoke(
                 input={
                     "format_instructions": self._parser.get_format_instructions(),
-                    "file_name": file_name
+                    "file_name": file_name,
                 },
-                config={"configurable": {"session_id": file_name}}
+                config={"configurable": {"session_id": file_name}},
             )
 
         except Exception as e:
@@ -48,7 +48,7 @@ class FileReviewer:
                 best_practices=[],
                 complexity_assessment="Unable to assess due to error",
                 maintainability="Unable to assess due to error",
-                recommendations=["Retry the review"]
+                recommendations=["Retry the review"],
             )
 
         return file_review

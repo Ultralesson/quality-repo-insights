@@ -10,7 +10,7 @@ import json
 
 
 class RepoFeedbackSummarizer:
-    def __init__(self, model='gpt-4o-mini'):
+    def __init__(self, model="gpt-4o-mini"):
         self.__llm = ChatOpenAI(model=model, temperature=0.7)
         self.__parser = PydanticOutputParser(pydantic_object=OverallSummary)
 
@@ -18,12 +18,12 @@ class RepoFeedbackSummarizer:
         cluster_summaries_history = ChatMessageHistory()
 
         for cluster, cluster_info in cluster_reviews.items():
-            cluster_summary = cluster_info['summary']
-            cluster_summaries_history.add_user_message(json.dumps(
-                cluster_summary.model_dump(
-                    exclude_none=True,
-                    exclude_unset=True
-                )))
+            cluster_summary = cluster_info["summary"]
+            cluster_summaries_history.add_user_message(
+                json.dumps(
+                    cluster_summary.model_dump(exclude_none=True, exclude_unset=True)
+                )
+            )
 
         summarization_chain = OVERALL_SUMMARY_PROMPT | self.__llm | self.__parser
 
@@ -31,7 +31,7 @@ class RepoFeedbackSummarizer:
             summary: OverallSummary = await summarization_chain.ainvoke(
                 input={
                     "chat_history": cluster_summaries_history.messages,
-                    "format_instructions": self.__parser.get_format_instructions()
+                    "format_instructions": self.__parser.get_format_instructions(),
                 }
             )
         except Exception as e:

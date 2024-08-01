@@ -1,16 +1,21 @@
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 
-FILE_REVIEW_PROMPT = ChatPromptTemplate.from_messages([
-    SystemMessagePromptTemplate.from_template(
-        """
+FILE_REVIEW_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        SystemMessagePromptTemplate.from_template(
+            """
         You are an expert code reviewer specializing in test automation and quality assurance. Your task is to provide a comprehensive review of code files, focusing on best practices, code quality, and effectiveness in the context of test automation. 
         
         Please structure your review according to the following format:
         {format_instructions}
         """
-    ),
-    HumanMessagePromptTemplate.from_template(
-        """
+        ),
+        HumanMessagePromptTemplate.from_template(
+            """
         Please review the code segments I've provided in the chat history. The file name is {file_name}.
         
         In your review, please focus on the following aspects:
@@ -26,12 +31,13 @@ FILE_REVIEW_PROMPT = ChatPromptTemplate.from_messages([
         Remember, this is a test automation project, so focus on relevant practices and patterns. 
         Don't expect to see traditional unit tests unless explicitly mentioned.
         """
-    ),
-    HumanMessagePromptTemplate.from_template(
-        """
+        ),
+        HumanMessagePromptTemplate.from_template(
+            """
         Based on the code segments in the chat history, provide a comprehensive summary of the file {file_name}.
         Ensure your review covers all aspects required by the output format, including the main purpose, key points, code quality, best practices, complexity, maintainability, and specific recommendations.
         Your review should be thorough yet concise, highlighting the most important aspects of the code in the context of test automation and quality assurance.
         """
-    )
-])
+        ),
+    ]
+)

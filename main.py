@@ -1,15 +1,19 @@
-from code_review.review_formatter.review_to_md import ReviewToMd
-from database.supabase import SupabaseDataClient
-from database.supabase.models import Repository
-from repo_traverser import LocalRepoTraverser, GitHubTraverser
-from llm.embeddings import CodeBertEmbedder
+import asyncio
+
 from dotenv import load_dotenv, find_dotenv
 
 from clustering import SimilarFilesClusterer
-from code_review.review_components import ClusterReviewer, ClusterReviewsSummarizer, RepoFeedbackSummarizer
+from code_review.review_components import (
+    ClusterReviewer,
+    ClusterReviewsSummarizer,
+    RepoFeedbackSummarizer,
+)
+from code_review.review_formatter.review_to_md import ReviewToMd
+from database.supabase import SupabaseDataClient
 from database.supabase.clients import RepositoryTableClient
-import asyncio
-
+from database.supabase.models import Repository
+from llm.embeddings import CodeBertEmbedder
+from repo_traverser import LocalRepoTraverser, GitHubTraverser
 from user_interactions import RepoDetailsUserInteractions
 
 load_dotenv(find_dotenv())
@@ -22,7 +26,9 @@ async def main():
     repo_name, repo_path = user_interactions.get_repo_path(repo_type)
 
     # Add Repo details to db
-    repo_id = RepositoryTableClient().add_repository(Repository(name=repo_name, url=repo_path))
+    repo_id = RepositoryTableClient().add_repository(
+        Repository(name=repo_name, url=repo_path)
+    )
     supabase_data_client = SupabaseDataClient(repo_id)
 
     # Traverse Repo
@@ -38,7 +44,9 @@ async def main():
     supabase_data_client.add_file_reviews_to_db(cluster_file_reviews)
 
     # Summarize Cluster Reviews
-    clusters_summaries = await ClusterReviewsSummarizer().summarize_cluster(cluster_file_reviews)
+    clusters_summaries = await ClusterReviewsSummarizer().summarize_cluster(
+        cluster_file_reviews
+    )
     supabase_data_client.add_cluster_summary_to_db(clusters_summaries)
 
     # Final Review
@@ -52,10 +60,10 @@ async def main():
 
 
 def __get_traverser(repo_type, repo_path, embedder=CodeBertEmbedder()):
-    if repo_type == '1':
+    if repo_type == "1":
         return GitHubTraverser(repo_path, embedder)
     return LocalRepoTraverser(repo_path, embedder)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

@@ -13,7 +13,7 @@ class SimilarFilesClusterer:
         best_k = 2
 
         for k in range(2, min(max_clusters, len(embeddings)) + 1):
-            kmeans = KMeans(n_clusters=k, init='k-means++', random_state=42)
+            kmeans = KMeans(n_clusters=k, init="k-means++", random_state=42)
             kmeans.fit(embeddings)
             labels = kmeans.labels_
 
@@ -29,7 +29,9 @@ class SimilarFilesClusterer:
 
         return best_k
 
-    def cluster_files(self, folder_structure: Dict[str, Dict]) -> Dict[str, List[Dict[str, Dict]]]:
+    def cluster_files(
+        self, folder_structure: Dict[str, Dict]
+    ) -> Dict[str, List[Dict[str, Dict]]]:
         file_names = []
         embeddings = []
 
@@ -39,11 +41,11 @@ class SimilarFilesClusterer:
         for file_name, file_info in folder_structure.items():
             file_names.append(file_name)
             file_contents_dict[file_name] = {
-                'chunks': file_info['chunks'],
-                'content': file_info['content']
+                "chunks": file_info["chunks"],
+                "content": file_info["content"],
             }
 
-            embedding = np.array(file_info['embeddings'])
+            embedding = np.array(file_info["embeddings"])
             if embedding.size > 0:
                 embeddings.append(embedding)
             else:
@@ -53,10 +55,16 @@ class SimilarFilesClusterer:
             max_length = max(e.shape[0] for e in embeddings)
             max_dim = max(e.shape[1] for e in embeddings if e.ndim == 2)
 
-            padded_embeddings = np.array([
-                np.pad(e, ((0, max_length - e.shape[0]), (0, max_dim - e.shape[1])), 'constant')
-                for e in embeddings
-            ])
+            padded_embeddings = np.array(
+                [
+                    np.pad(
+                        e,
+                        ((0, max_length - e.shape[0]), (0, max_dim - e.shape[1])),
+                        "constant",
+                    )
+                    for e in embeddings
+                ]
+            )
         except Exception as e:
             raise RuntimeError(f"Error padding embeddings: {e}")
 
@@ -67,14 +75,14 @@ class SimilarFilesClusterer:
         n_clusters = self.__find_optimal_clusters(padded_embeddings)
 
         # Apply KMeans clustering
-        kmeans = KMeans(n_clusters=n_clusters, init='k-means++', random_state=42)
+        kmeans = KMeans(n_clusters=n_clusters, init="k-means++", random_state=42)
         labels = kmeans.fit_predict(padded_embeddings)
 
         # Group files by cluster labels
         clustered_files = defaultdict(list)
         for file_name, label in zip(file_names, labels):
-            clustered_files[int(label)].append({
-                file_name: file_contents_dict[file_name]
-            })
+            clustered_files[int(label)].append(
+                {file_name: file_contents_dict[file_name]}
+            )
 
         return dict(clustered_files)

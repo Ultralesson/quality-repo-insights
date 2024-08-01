@@ -7,7 +7,7 @@ load_dotenv(find_dotenv())
 
 
 class OpenAIEmbedder(EmbeddingContract):
-    def __init__(self, model='text-embedding-3-small'):
+    def __init__(self, model="text-embedding-3-small"):
         self._model = model
         self._client = OpenAI()
 
@@ -16,9 +16,7 @@ class OpenAIEmbedder(EmbeddingContract):
         Generates embeddings for the given text using OpenAI's API.
         """
         response = self._client.embeddings.create(
-            input=text,
-            model=self._model,
-            encoding_format="float"
+            input=text, model=self._model, encoding_format="float"
         )
 
         return np.array(response.data[0].embedding)
@@ -27,16 +25,16 @@ class OpenAIEmbedder(EmbeddingContract):
         """
         Splits the text into chunks of approximate size based on max_tokens.
         """
-        sentences = text.split('.')
+        sentences = text.split(".")
         chunks = []
-        current_chunk = ''
+        current_chunk = ""
 
         for sentence in sentences:
             if len(current_chunk) + len(sentence) < max_tokens:
-                current_chunk += sentence + '.'
+                current_chunk += sentence + "."
             else:
                 chunks.append(current_chunk.strip())
-                current_chunk = sentence + '.'
+                current_chunk = sentence + "."
 
         if current_chunk:
             chunks.append(current_chunk.strip())

@@ -5,8 +5,8 @@ from code_review.parsers import ClusterSummary
 
 def format_cluster_summaries(cluster_info: Dict[str, Dict]):
     for cluster_name, cluster_summaries in cluster_info.items():
-        cluster_files = cluster_summaries['files']
-        cluster_summary: ClusterSummary = cluster_summaries['summary']
+        cluster_files = cluster_summaries["files"]
+        cluster_summary: ClusterSummary = cluster_summaries["summary"]
         md_content = formatted_cluster_summary(cluster_summary, cluster_files)
         with open(f"review_output/cluster_reviews/{cluster_name}.md", "w") as md_file:
             md_file.write(md_content)
@@ -15,7 +15,7 @@ def format_cluster_summaries(cluster_info: Dict[str, Dict]):
 def __get_formatted_li_items(list_items: List[str]):
     formatted_texts = []
     for item in list_items:
-        formatted_texts.append(f'- {item}')
+        formatted_texts.append(f"- {item}")
     return formatted_texts
 
 

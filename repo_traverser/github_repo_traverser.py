@@ -5,7 +5,7 @@ from collections import deque
 from github import Github, Auth
 
 from config import GITHUB_ACCESS_TOKEN
-from llm.embeddings.embedding_contract import EmbeddingContract
+from llm.embeddings import EmbeddingContract
 from repo_traverser.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
 from repo_traverser.traverser import Traverser
 
@@ -21,7 +21,7 @@ class GitHubTraverser(Traverser):
         queue = deque([""])
 
         owner, repo_name = self.__extract_repo_details()
-        repo = self.__client.get_repo(f'{owner}/{repo_name}')
+        repo = self.__client.get_repo(f"{owner}/{repo_name}")
 
         while queue:
             current_folder = queue.popleft()
@@ -34,28 +34,34 @@ class GitHubTraverser(Traverser):
                 if content.type == "dir":
                     queue.append(content.path)
                 else:
-                    file_content = repo.get_contents(content.path).decoded_content.decode('utf-8')
+                    file_content = repo.get_contents(
+                        content.path
+                    ).decoded_content.decode("utf-8")
                     chunks = self.__embedder.split_text_into_chunks(file_content)
-                    embeddings = [self.__embedder.generate_embeddings(chunk) for chunk in chunks]
+                    embeddings = [
+                        self.__embedder.generate_embeddings(chunk) for chunk in chunks
+                    ]
                     folder_structure[content.path] = {
-                        'content': file_content,
-                        'chunks': chunks,
-                        'embeddings': embeddings
+                        "content": file_content,
+                        "chunks": chunks,
+                        "embeddings": embeddings,
                     }
 
         return folder_structure
 
     def __extract_repo_details(self):
-        pattern = r'https://github.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)'
+        pattern = r"https://github.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)"
         match = re.match(pattern, self.__repo_path)
         if match:
-            return match.group('owner'), match.group('repo')
+            return match.group("owner"), match.group("repo")
         else:
-            raise ValueError(f'Invalid GitHub URL: {self.__repo_path}')
+            raise ValueError(f"Invalid GitHub URL: {self.__repo_path}")
 
     @staticmethod
     def __should_ignore(path: str):
-        if any(fnmatch.fnmatch(path.split('/')[-1], pattern) for pattern in IGNORE_PATTERNS):
+        if any(
+            fnmatch.fnmatch(path.split("/")[-1], pattern) for pattern in IGNORE_PATTERNS
+        ):
             return True
 
         for pattern in IGNORE_PATTERNS:
