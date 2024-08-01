@@ -1,14 +1,10 @@
 import threading
 from typing import Dict, List
 
-from code_review.parsers import CodeReviewSummary, ClusterSummary
-from code_review.parsers.overall_summary import OverallSummary
-from database.supabase.clients.cluster_table_client import ClusterTableClient
-from database.supabase.clients.fileinfo_table_client import FileInfoTableClient
-from database.supabase.clients.repository_table_client import RepositoryTableClient
-from database.supabase.models.cluster import Cluster
-from database.supabase.models.file_info import FileInfo
-from database.supabase.models.repository import Repository
+from code_review import CodeReviewSummary, ClusterSummary
+from code_review import OverallSummary
+from database.supabase.clients import ClusterTableClient, FileInfoTableClient, RepositoryTableClient
+from database.supabase.models import Cluster, FileInfo, Repository
 
 
 class SupabaseDataClient:
@@ -32,7 +28,6 @@ class SupabaseDataClient:
             self._initialized = True
 
     def add_clusters_and_files_to_db(self, cluster_files: Dict[str, List[Dict[str, Dict]]]):
-        print('Adding clusters and Files to DB')
         for cluster_name, cluster_files_info in cluster_files.items():
             cluster_info = self.__cluster_table_client.add_cluster(Cluster(
                 repo_id=self.__repo_id,
@@ -60,7 +55,6 @@ class SupabaseDataClient:
                     })
 
     def add_file_reviews_to_db(self, cluster_file_reviews: Dict[str, Dict[str, CodeReviewSummary]]):
-        print('Adding File reviews to db')
         for cluster_name, file_reviews in cluster_file_reviews.items():
             cluster_db_data = self.__cluster_db_data[cluster_name]
 
@@ -74,7 +68,6 @@ class SupabaseDataClient:
                         break
 
     def add_cluster_summary_to_db(self, cluster_summaries: Dict[str, ClusterSummary]):
-        print('Adding Cluster Reviews to DB')
         for cluster_name, summary in cluster_summaries.items():
             cluster_id = self.__cluster_db_data[cluster_name]['cluster_id']
             self.__cluster_table_client.update_cluster(
@@ -83,7 +76,6 @@ class SupabaseDataClient:
             )
 
     def add_overall_review_to_db(self, review: OverallSummary):
-        print('Adding Overall Review to DB')
         self.__repository_table_client.update_repository(
             data=Repository(feedback=review),
             id=self.__repo_id

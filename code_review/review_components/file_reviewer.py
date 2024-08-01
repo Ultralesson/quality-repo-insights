@@ -3,9 +3,9 @@ from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
-from code_review.parsers.code_review_summary import CodeReviewSummary
+from code_review.parsers import CodeReviewSummary
 
-from code_review.prompts.file_review_prompts import FILE_REVIEW_PROMPT
+from code_review.prompts import FILE_REVIEW_PROMPT
 
 
 class FileReviewer:

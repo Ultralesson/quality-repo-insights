@@ -4,9 +4,8 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 
-from code_review.parsers import ClusterSummary
-from code_review.parsers.overall_summary import OverallSummary
-from code_review.prompts.overall_summary_prompt import OVERALL_SUMMARY_PROMPT
+from code_review.parsers import ClusterSummary, OverallSummary
+from code_review.prompts import OVERALL_SUMMARY_PROMPT
 import json
 
 

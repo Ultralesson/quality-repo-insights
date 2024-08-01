@@ -3,16 +3,16 @@ from langchain_core.prompts import HumanMessagePromptTemplate, SystemMessageProm
 OVERALL_SUMMARY_PROMPT = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(
         """
-        You are creating an overall summary of a code repository based on summaries of multiple file clusters. 
+        You are creating an overall summary of a code repo_traverser based on summaries of multiple file clusters. 
         Your task is to synthesize these summaries into a comprehensive overview without referencing specific cluster names 
         or assuming knowledge about tools and frameworks that isn't explicitly mentioned in the summaries.
         """),
     HumanMessagePromptTemplate.from_template(
-        "Here are the summaries of different clusters in the repository:\n\n{chat_history}"
+        "Here are the summaries of different clusters in the repo_traverser:\n\n{chat_history}"
     ),
     HumanMessagePromptTemplate.from_template(
         """
-        Based on these cluster summaries, provide a comprehensive overview of the entire repository. Your summary should:
+        Based on these cluster summaries, provide a comprehensive overview of the entire repo_traverser. Your summary should:
         1. Provide a high-level project overview.
         2. Identify main themes and key findings across all summaries.
         3. List common issues grouped by category.

@@ -6,7 +6,7 @@ from sklearn.metrics import silhouette_score
 from collections import defaultdict
 
 
-class FileClusterer:
+class SimilarFilesClusterer:
 
     @staticmethod
     def __find_optimal_clusters(embeddings, max_clusters=20):

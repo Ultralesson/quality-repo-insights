@@ -1,4 +1,4 @@
-from llm.contracts import EmbeddingContract
+from llm.embeddings import EmbeddingContract
 from openai import OpenAI
 from dotenv import load_dotenv, find_dotenv
 import numpy as np
@@ -6,7 +6,7 @@ import numpy as np
 load_dotenv(find_dotenv())
 
 
-class OpenAIEmbedding(EmbeddingContract):
+class OpenAIEmbedder(EmbeddingContract):
     def __init__(self, model='text-embedding-3-small'):
         self._model = model
         self._client = OpenAI()

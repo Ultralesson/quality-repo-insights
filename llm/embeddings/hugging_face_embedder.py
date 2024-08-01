@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 import numpy as np
 
 
-class HuggingFaceEmbedding(EmbeddingContract):
+class HuggingFaceEmbedder(EmbeddingContract):
 
     def __init__(self, model='sentence-transformers/all-MiniLM-L6-v2'):
         self._embedding_model = SentenceTransformer(model)

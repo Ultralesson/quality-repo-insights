@@ -1,44 +1,39 @@
-from typing import List
-
 import requests
 
-from code_review.cluster_review_summarizer import ClusterReviewsSummarizer
-from code_review.repo_summary import RepoFeedbackSummarizer
-from database.data_clients.supabase_data_client import SupabaseDataClient
-from database.supabase.models.repository import Repository
-from repository import LocalRepoTraverser
-from llm.embeddings.codebert_embedder import CodeBertEmbedder
+from database.supabase import SupabaseDataClient
+from database.supabase.models import Repository
+from repo_traverser import LocalRepoTraverser, GitHubTraverser
+from llm.embeddings import CodeBertEmbedder
 from dotenv import load_dotenv, find_dotenv
 
-from repository.github_repo_traverser import GitHubTraverser
-from similarity_clustering import FileClusterer
-from code_review.cluster_reviewer import ClusterReviewer
-from database.supabase.clients.repository_table_client import RepositoryTableClient
+from clustering import SimilarFilesClusterer
+from code_review.review_components import ClusterReviewer, ClusterReviewsSummarizer, RepoFeedbackSummarizer
+from database.supabase.clients import RepositoryTableClient
 import asyncio
 import os
 import json
+
+from user_interactions import RepoDetailsUserInteractions
 
 load_dotenv(find_dotenv())
 
 
 async def main():
     # Get User Input
-    repo_type = __get_repo_type()
-    repo_path = __get_repo_path(repo_type)
-    repo_name = repo_path.split('/')[-1]
+    user_interactions = RepoDetailsUserInteractions()
+    repo_type = user_interactions.get_repo_type()
+    repo_name, repo_path = user_interactions.get_repo_path(repo_type)
 
     # Add Repo details to db
-    repo_details = RepositoryTableClient().add_repository(Repository(name=repo_name, url=repo_path))
-    repo_id = repo_details[0]['id']
-
+    repo_id = RepositoryTableClient().add_repository(Repository(name=repo_name, url=repo_path))
     supabase_data_client = SupabaseDataClient(repo_id)
 
     # Traverse Repo
     traverser = __get_traverser(repo_type, repo_path)
     folder_structure = traverser.extract_folder_structure_and_contents()
 
-    # Cluster
-    clustered_files = FileClusterer().cluster_files(folder_structure)
+    # Cluster Files
+    clustered_files = SimilarFilesClusterer().cluster_files(folder_structure)
     supabase_data_client.add_clusters_and_files_to_db(clustered_files)
 
     # Get Cluster Review
@@ -54,32 +49,6 @@ async def main():
     supabase_data_client.add_overall_review_to_db(final_review)
     print('Final Review:\n\n')
     print(json.dumps(final_review.model_dump(exclude_none=True, exclude_unset=True)))
-
-
-def __get_repo_type():
-    repo_type = ''
-    while repo_type == '':
-        repo_type = input("Repository Type:\n1. GitHub\n2. Local\nSelect 1 or 2: ")
-        if repo_type.strip() == '1' or repo_type.strip() == '2':
-            return repo_type
-
-
-def __get_repo_path(repo_type):
-    def is_repo_type_github():
-        return repo_type == '1'
-
-    valid_repo_path = False
-
-    while not valid_repo_path:
-        repo_path = input(f'\n\nEnter the repo {'url' if is_repo_type_github() else 'path'}: ')
-
-        if is_repo_type_github():
-            valid_repo_path = requests.get(repo_path).status_code == 200
-        else:
-            valid_repo_path = os.path.exists(repo_path)
-
-        if valid_repo_path:
-            return repo_path
 
 
 def __get_traverser(repo_type, repo_path, embedder=CodeBertEmbedder()):

@@ -1,6 +1,8 @@
 from transformers import AutoTokenizer, AutoModel
-from llm.contracts import EmbeddingContract
+
 import torch
+
+from llm.embeddings import EmbeddingContract
 
 
 class CodeBertEmbedder(EmbeddingContract):

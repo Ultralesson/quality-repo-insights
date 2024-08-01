@@ -1,1 +1,0 @@
-from .embedding_contract import EmbeddingContract

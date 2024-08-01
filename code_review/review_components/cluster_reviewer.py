@@ -4,12 +4,11 @@ from typing import Dict, List
 
 from langchain_openai import ChatOpenAI
 
-from code_review.file_reviewer import FileReviewer
+from code_review.review_components import FileReviewer
 
 from langchain_core.output_parsers import PydanticOutputParser
 
-from code_review.parsers import CodeReviewSummary
-from code_review.parsers import ClusterSummary
+from code_review.parsers import CodeReviewSummary, ClusterSummary
 
 
 class ClusterReviewer:
