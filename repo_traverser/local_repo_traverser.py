@@ -1,61 +1,68 @@
+import asyncio
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List
 
-from llm.embeddings import EmbeddingContract
 from repo_traverser.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
 from repo_traverser.traverser import Traverser
 
 
 class LocalRepoTraverser(Traverser):
-    def __init__(self, repo_path: str, embedder: EmbeddingContract):
+    def __init__(self, repo_path: str):
+        super().__init__()
         self._repo_path = repo_path if repo_path.endswith("/") else f"{repo_path}/"
-        self._embedder = embedder
 
-    def extract_folder_structure_and_contents(self, max_tokens=512):
-        folder_structure = {}
+    async def extract_contents(self, max_tokens=512) -> Dict[str, List[str]]:
+        loop = asyncio.get_event_loop()
+        file_info = {}
+        futures = []
 
-        for dirpath, dirnames, filenames in os.walk(self._repo_path):
-            if dirpath == self._repo_path:
-                continue
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            for dir_path, dir_names, file_names in os.walk(self._repo_path):
+                if dir_path == self._repo_path:
+                    continue
 
-            if self.__should_ignore(dirpath):
-                dirnames[:] = []
-                continue
+                if self.__should_ignore(dir_path):
+                    dir_names[:] = []
+                    continue
 
-            dirnames[:] = [
-                d
-                for d in dirnames
-                if not self.__should_ignore(os.path.join(dirpath, d))
-            ]
-            filenames[:] = [
-                f
-                for f in filenames
-                if not self.__should_ignore(os.path.join(dirpath, f))
-            ]
+                dir_names[:] = [
+                    dir_name
+                    for dir_name in dir_names
+                    if not self.__should_ignore(os.path.join(dir_path, dir_name))
+                ]
 
-            for filename in filenames:
-                file_path = os.path.join(dirpath, filename)
-                rel_file_name = os.path.normpath(file_path.split(self._repo_path)[-1])
+                file_names[:] = [
+                    file_name
+                    for file_name in file_names
+                    if not self.__should_ignore(os.path.join(dir_path, file_name))
+                ]
 
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        content = f.read()
-                        chunks = self._embedder.split_text_into_chunks(
-                            content, max_tokens
-                        )
-                        embeddings = [
-                            self._embedder.generate_embeddings(chunk)
-                            for chunk in chunks
-                        ]
+                for file_name in file_names:
+                    future = loop.run_in_executor(
+                        executor, self.__process_file, dir_path, file_name
+                    )
+                    futures.append(future)
 
-                        folder_structure[rel_file_name] = {
-                            "content": content,
-                            "chunks": chunks,
-                            "embeddings": embeddings,
-                        }
-                except Exception as e:
-                    print(f"Could not read file {file_path}: {e}")
+            results = await asyncio.gather(*futures)
 
-        return folder_structure
+            for result in results:
+                file_name, chunks = result
+                file_info[file_name] = chunks
+
+        return file_info
+
+    def __process_file(self, dir_path: str, file_name: str):
+        file = os.path.join(dir_path, file_name)
+        rel_file_name = os.path.normpath(file.split(self._repo_path)[-1])
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                content = f.read()
+                chunks = self._split_text_into_chunks(content)
+                return rel_file_name, chunks
+        except Exception as e:
+            print(f"Could not read file {file}: {e}")
+            return rel_file_name, None
 
     def __should_ignore(self, path):
         normalized_path = os.path.normpath(path)

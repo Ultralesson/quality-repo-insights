@@ -1,53 +1,64 @@
+import asyncio
 import fnmatch
 import re
+import threading
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, List
 
 from github import Github, Auth
 
 from config import GITHUB_ACCESS_TOKEN
-from llm.embeddings import EmbeddingContract
 from repo_traverser.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
 from repo_traverser.traverser import Traverser
 
 
 class GitHubTraverser(Traverser):
-    def __init__(self, repo_path: str, embedder: EmbeddingContract):
+    def __init__(self, repo_path: str):
+        super().__init__()
         self.__repo_path = repo_path
         self.__client = Github(auth=Auth.Token(GITHUB_ACCESS_TOKEN))
-        self.__embedder = embedder
+        self.__embedder_lock = threading.Lock()
 
-    def extract_folder_structure_and_contents(self):
-        folder_structure = {}
+    async def extract_contents(self) -> Dict[str, List[str]]:
+        file_info = {}
         queue = deque([""])
 
         owner, repo_name = self.__extract_repo_details()
         repo = self.__client.get_repo(f"{owner}/{repo_name}")
 
-        while queue:
-            current_folder = queue.popleft()
-            contents = repo.get_contents(current_folder)
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            loop = asyncio.get_event_loop()
+            futures = []
+            while queue:
+                current_folder = queue.popleft()
+                contents = repo.get_contents(current_folder)
 
-            for content in contents:
-                if self.__should_ignore(content.path):
-                    continue
+                for content in contents:
+                    if self.__should_ignore(content.path):
+                        continue
 
-                if content.type == "dir":
-                    queue.append(content.path)
-                else:
-                    file_content = repo.get_contents(
-                        content.path
-                    ).decoded_content.decode("utf-8")
-                    chunks = self.__embedder.split_text_into_chunks(file_content)
-                    embeddings = [
-                        self.__embedder.generate_embeddings(chunk) for chunk in chunks
-                    ]
-                    folder_structure[content.path] = {
-                        "content": file_content,
-                        "chunks": chunks,
-                        "embeddings": embeddings,
-                    }
+                    if content.type == "dir":
+                        queue.append(content.path)
+                    else:
+                        future = loop.run_in_executor(
+                            executor, self.__process_file, content.path, repo
+                        )
+                        futures.append(future)
 
-        return folder_structure
+            results = await asyncio.gather(*futures)
+
+            for result in results:
+                file_name, chunks = result
+                file_info[file_name] = chunks
+
+        return file_info
+
+    def __process_file(self, file_path, repo):
+        file_content = repo.get_contents(file_path).decoded_content.decode()
+        with self.__embedder_lock:
+            chunks: List[str] = self._split_text_into_chunks(file_content)
+        return file_path, chunks
 
     def __extract_repo_details(self):
         pattern = r"https://github.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)"

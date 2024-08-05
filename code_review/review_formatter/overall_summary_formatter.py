@@ -1,13 +1,5 @@
-from typing import List
-
 from code_review.parsers import OverallSummary
-
-
-def __get_formatted_li_items(list_items: List[str]):
-    formatted_texts = []
-    for item in list_items:
-        formatted_texts.append(f"- {item}")
-    return formatted_texts
+from code_review.review_formatter.md_util import get_formatted_li_items
 
 
 def overall_formatted_review(final_summary: OverallSummary):
@@ -17,15 +9,15 @@ def overall_formatted_review(final_summary: OverallSummary):
 
 ## Clusters Identified
 
-{'\n'.join(__get_formatted_li_items(final_summary.main_clusters))}
+{'\n'.join(get_formatted_li_items(final_summary.main_clusters))}
 
 ## Key Strengths
 
-{'\n'.join(__get_formatted_li_items(final_summary.key_strengths))}
+{'\n'.join(get_formatted_li_items(final_summary.key_strengths))}
 
 ## Primary Concerns
 
-{'\n'.join(__get_formatted_li_items(final_summary.primary_concerns))}
+{'\n'.join(get_formatted_li_items(final_summary.primary_concerns))}
 
 ## Code Quality
 
@@ -45,15 +37,15 @@ def overall_formatted_review(final_summary: OverallSummary):
 
 ## Patterns/Issues observed across Clusters
 
-{'\n'.join(__get_formatted_li_items(final_summary.cross_cluster_patterns))}
+{'\n'.join(get_formatted_li_items(final_summary.cross_cluster_patterns))}
 
 ## Recommendations
 
-{'\n'.join(__get_formatted_li_items(final_summary.high_priority_recommendations))}
+{'\n'.join(get_formatted_li_items(final_summary.high_priority_recommendations))}
 
 ## Next Steps
 
-{'\n'.join(__get_formatted_li_items(final_summary.next_steps))}
+{'\n'.join(get_formatted_li_items(final_summary.next_steps))}
 """
     with open("review_output/overall_summary.md", "w") as md_file:
         md_file.write(md_content)

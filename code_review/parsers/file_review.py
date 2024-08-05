@@ -2,16 +2,18 @@ from typing import List, Dict
 
 from pydantic import BaseModel, Field
 
+from code_review.prompts.file_types import FILE_TYPES
 
-class CodeReviewSummary(BaseModel):
+
+class FileReview(BaseModel):
     main_purpose: str = Field(
         description="Brief description of the file's main purpose in the context of test automation or quality assurance"
     )
     key_points: List[str] = Field(
         description="List of key points or observations about the code"
     )
-    file_type: str = Field(
-        description="Type of file (e.g., Test Class, Page Object, Utility, Configuration)"
+    file_type: FILE_TYPES = Field(
+        description="Specific type of file (e.g., Test Script, Page Object, Utility Function, Configuration File)"
     )
     code_quality: Dict[str, List[str]] = Field(
         default_factory=dict,

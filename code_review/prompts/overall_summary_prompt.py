@@ -27,6 +27,7 @@ OVERALL_SUMMARY_PROMPT = ChatPromptTemplate.from_messages(
         6. Briefly summarize the most significant aspects of the clusters without naming them specifically.
         7. Assess the overall complexity of the codebase.
         8. Suggest potential improvements and next steps.
+        9. Identify any potential gaps in the overall testing strategy based on the file types and clusters observed.
 
         Do not make assumptions about specific tools or frameworks unless they are explicitly mentioned in the summaries.
         Don't expect to see traditional unit tests unless explicitly mentioned.

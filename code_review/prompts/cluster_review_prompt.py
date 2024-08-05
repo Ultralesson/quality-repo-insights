@@ -13,6 +13,7 @@ CLUSTER_FILES_SUMMARIZATION_PROMPT = ChatPromptTemplate.from_messages(
         HumanMessagePromptTemplate.from_template(
             """
         Distill the above reviews into a single summary review for this cluster.
+        Additionally, identify any potential gaps or redundancies within this cluster.
         Include as many specific details as you can in the following format.
         {format_instructions}
         """

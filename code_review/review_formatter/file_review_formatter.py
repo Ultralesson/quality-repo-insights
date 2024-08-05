@@ -1,23 +1,15 @@
-from typing import List
-
-from code_review.parsers import CodeReviewSummary
-
-
-def __get_formatted_li_items(list_items: List[str]):
-    formatted_texts = []
-    for item in list_items:
-        formatted_texts.append(f"- {item}")
-    return formatted_texts
+from code_review.parsers import FileReview
+from code_review.review_formatter.md_util import get_formatted_li_items
 
 
-def formatted_file_summary(file_name: str, review_summary: CodeReviewSummary):
+def formatted_file_summary(file_name: str, review_summary: FileReview):
     md_content = f"""## Main Purpose:
 
 {review_summary.main_purpose}
 
 ## Key Points
 
-{'\n'.join(__get_formatted_li_items(review_summary.key_points))}
+{'\n'.join(get_formatted_li_items(review_summary.key_points))}
 
 ## File Type
 
@@ -29,7 +21,7 @@ def formatted_file_summary(file_name: str, review_summary: CodeReviewSummary):
 
 ## Best Practices
 
-{'\n'.join(__get_formatted_li_items(review_summary.best_practices))}
+{'\n'.join(get_formatted_li_items(review_summary.best_practices))}
 
 ## Complexity
 
@@ -41,8 +33,10 @@ def formatted_file_summary(file_name: str, review_summary: CodeReviewSummary):
 
 ## Recommendations
 
-{'\n'.join(__get_formatted_li_items(review_summary.recommendations))}
+{'\n'.join(get_formatted_li_items(review_summary.recommendations))}
 """
 
-    with open(f"review_output/file_reviews/{file_name}.md", "w") as md_file:
+    with open(
+        f"review_output/file_reviews/{file_name.replace(".", "_")}.md", "w"
+    ) as md_file:
         md_file.write(md_content)

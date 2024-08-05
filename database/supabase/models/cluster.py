@@ -9,5 +9,4 @@ class Cluster(BaseModel):
     id: Optional[str] = None
     repo_id: str = None
     cluster_name: str = None
-    cluster_category: Optional[str] = None
-    feedback_summary: Optional[ClusterSummary] = None
+    cluster_summary: ClusterSummary = None

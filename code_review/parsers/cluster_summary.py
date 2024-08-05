@@ -4,11 +4,18 @@ from pydantic import BaseModel, Field
 
 
 class ClusterSummary(BaseModel):
-    cluster_name: str = Field(description="Name or identifier of the cluster")
+    cluster_name: str = Field(
+        description="Name or identifier of the cluster based on the predominant file type in this cluster"
+    )
     main_purpose: str = Field(
         description="Overall purpose of this cluster in the test automation suite"
     )
-    file_types: List[str] = Field(description="Types of files found in this cluster")
+    primary_file_type: str = Field(
+        description="The predominant file type in this cluster"
+    )
+    secondary_file_types: List[str] = Field(
+        description="Other file types found in this cluster"
+    )
     key_themes: List[str] = Field(
         description="Main themes or patterns observed across files in this cluster"
     )

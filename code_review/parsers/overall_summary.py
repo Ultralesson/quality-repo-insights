@@ -9,6 +9,9 @@ class OverallSummary(BaseModel):
     main_clusters: List[str] = Field(
         description="List of main clusters identified in the project"
     )
+    file_type_distribution: Dict[str, int] = Field(
+        description="Distribution of different file types across the project"
+    )
     key_strengths: List[str] = Field(
         description="Key strengths of the overall test automation suite"
     )

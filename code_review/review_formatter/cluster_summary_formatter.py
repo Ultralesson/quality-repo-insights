@@ -1,30 +1,23 @@
-from typing import Dict, List
+from typing import List, Dict
 
-from code_review.parsers import ClusterSummary
-
-
-def format_cluster_summaries(cluster_info: Dict[str, Dict]):
-    for cluster_name, cluster_summaries in cluster_info.items():
-        cluster_files = cluster_summaries["files"]
-        cluster_summary: ClusterSummary = cluster_summaries["summary"]
-        md_content = formatted_cluster_summary(cluster_summary, cluster_files)
-        with open(f"review_output/cluster_reviews/{cluster_name}.md", "w") as md_file:
-            md_file.write(md_content)
+from code_review.parsers import ClusterSummary, FileReview
+from code_review.review_components.models import ClusterInfo
+from code_review.review_formatter.md_util import get_formatted_li_items
 
 
-def __get_formatted_li_items(list_items: List[str]):
-    formatted_texts = []
-    for item in list_items:
-        formatted_texts.append(f"- {item}")
-    return formatted_texts
+def format_and_write_cluster_review(cluster: ClusterInfo):
+    cluster_summary: ClusterSummary = cluster.summary
+    cluster_name = cluster.name
+    cluster_file_reviews: Dict[str, FileReview] = cluster.file_reviews
+
+    cluster_files = [file_name for file_name, _ in cluster_file_reviews.items()]
+    md_content = formatted_cluster_summary(cluster_summary, cluster_files)
+    with open(f"review_output/cluster_reviews/{cluster_name}.md", "w") as md_file:
+        md_file.write(md_content)
 
 
 def formatted_cluster_summary(cluster_summary: ClusterSummary, files: List[str]):
-    return f"""## Cluster Label:
-
-{cluster_summary.cluster_name}
-
-## Files
+    return f"""## Files
 
 {'\n'.join(files)}
 
@@ -34,11 +27,17 @@ def formatted_cluster_summary(cluster_summary: ClusterSummary, files: List[str])
 
 ## File Types
 
-{'\n'.join(__get_formatted_li_items(cluster_summary.file_types))}
+### Primary
+
+{cluster_summary.primary_file_type}
+
+### Secondary
+
+{'\n'.join(get_formatted_li_items(cluster_summary.secondary_file_types))}
 
 ## Key Themes
 
-{'\n'.join(__get_formatted_li_items(cluster_summary.key_themes))}
+{'\n'.join(get_formatted_li_items(cluster_summary.key_themes))}
 
 ## Overall Code Quality
 
@@ -58,13 +57,13 @@ def formatted_cluster_summary(cluster_summary: ClusterSummary, files: List[str])
 
 ## Strengths
 
-{'\n'.join(__get_formatted_li_items(cluster_summary.strengths))}
+{'\n'.join(get_formatted_li_items(cluster_summary.strengths))}
 
 ## Areas for Improvement
 
-{'\n'.join(__get_formatted_li_items(cluster_summary.areas_for_improvement))}
+{'\n'.join(get_formatted_li_items(cluster_summary.areas_for_improvement))}
 
 ## Recommendations
 
-{'\n'.join(__get_formatted_li_items(cluster_summary.cluster_recommendations))}
+{'\n'.join(get_formatted_li_items(cluster_summary.cluster_recommendations))}
 """

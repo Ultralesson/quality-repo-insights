@@ -1,3 +1,3 @@
 from .overall_summary import OverallSummary
-from .code_review_summary import CodeReviewSummary
+from .file_review import FileReview
 from .cluster_summary import ClusterSummary
