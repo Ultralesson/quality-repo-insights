@@ -14,12 +14,10 @@ langchain-huggingface = "*"
 sentence-transformers = "*"
 transformers = "*"
 torch = "*"
-scikit-learn = "*"
 supabase = "*"
 pygithub = "*"
 langchain-community = "*"
 requests = "*"
-black = "*"
 gitpython = "*"
 
 [dev-packages]
