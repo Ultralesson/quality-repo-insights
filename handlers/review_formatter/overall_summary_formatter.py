@@ -1,9 +1,9 @@
 from code_review.parsers import OverallSummary
-from code_review.review_formatter.md_util import get_formatted_li_items
+from handlers.review_formatter.md_util import get_formatted_li_items
 
 
-def overall_formatted_review(final_summary: OverallSummary):
-    md_content = f"""## Project Overview:
+def get_overall_summary_md(final_summary: OverallSummary):
+    return f"""## Project Overview:
 
 {final_summary.project_overview}
 
@@ -47,5 +47,3 @@ def overall_formatted_review(final_summary: OverallSummary):
 
 {'\n'.join(get_formatted_li_items(final_summary.next_steps))}
 """
-    with open("review_output/overall_summary.md", "w") as md_file:
-        md_file.write(md_content)

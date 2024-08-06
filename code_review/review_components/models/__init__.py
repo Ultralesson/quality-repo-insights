@@ -1,1 +1,1 @@
-from .cluster_info import ClusterInfo
+from .cluster_info import ClusterReviewInfo

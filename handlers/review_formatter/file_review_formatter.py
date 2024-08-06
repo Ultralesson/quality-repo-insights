@@ -1,8 +1,8 @@
 from code_review.parsers import FileReview
-from code_review.review_formatter.md_util import get_formatted_li_items
+from handlers.review_formatter.md_util import get_formatted_li_items
 
 
-def formatted_file_summary(file_name: str, review_summary: FileReview):
+def create_file_review_md(file_name: str, review_summary: FileReview, review_dir: str):
     md_content = f"""## Main Purpose:
 
 {review_summary.main_purpose}
@@ -36,7 +36,5 @@ def formatted_file_summary(file_name: str, review_summary: FileReview):
 {'\n'.join(get_formatted_li_items(review_summary.recommendations))}
 """
 
-    with open(
-        f"review_output/file_reviews/{file_name.replace(".", "_")}.md", "w"
-    ) as md_file:
+    with open(f"{review_dir}/{file_name.replace(".", "_")}.md", "w") as md_file:
         md_file.write(md_content)

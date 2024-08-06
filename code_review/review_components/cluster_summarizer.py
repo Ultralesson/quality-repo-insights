@@ -9,7 +9,7 @@ from code_review.parsers.file_review import FileReview
 from code_review.prompts.cluster_review_prompt import CLUSTER_FILES_SUMMARIZATION_PROMPT
 import json
 
-from code_review.review_components.models import ClusterInfo
+from code_review.review_components.models import ClusterReviewInfo
 
 
 class ClusterSummarizer:
@@ -20,8 +20,8 @@ class ClusterSummarizer:
     async def cluster_and_summarize(
         self,
         reviews: Dict[str, FileReview],
-    ) -> List[ClusterInfo]:
-        cluster_summaries: List[ClusterInfo] = []
+    ) -> List[ClusterReviewInfo]:
+        cluster_summaries: List[ClusterReviewInfo] = []
         clusters = self.__create_clusters(reviews)
         summary_history = ChatMessageHistory()
 
@@ -49,7 +49,7 @@ class ClusterSummarizer:
                 )
 
                 cluster_summaries.append(
-                    ClusterInfo(
+                    ClusterReviewInfo(
                         name=cluster_name,
                         summary=summary,
                         file_reviews=cluster_file_reviews,

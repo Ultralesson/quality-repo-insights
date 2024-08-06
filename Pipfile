@@ -20,6 +20,7 @@ pygithub = "*"
 langchain-community = "*"
 requests = "*"
 black = "*"
+gitpython = "*"
 
 [dev-packages]
 

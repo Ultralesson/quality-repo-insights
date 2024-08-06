@@ -1,5 +1,5 @@
-from database.supabase.clients.data_repository import DataRepository
-from database.supabase.models.file_info import FileInfo
+from integrations.supabase.clients.data_repository import DataRepository
+from integrations.supabase.models.file_info import FileInfo
 
 
 class FileInfoTableClient(DataRepository[FileInfo]):
@@ -33,4 +33,8 @@ class FileInfoTableClient(DataRepository[FileInfo]):
         if file_id is not None:
             filter_condition["id"] = file_id
 
+        return self._select(filter_condition)
+
+    def get_cluster_files(self, cluster_id):
+        filter_condition = {"cluster_id": cluster_id, "repo_id": self.__repo_id}
         return self._select(filter_condition)

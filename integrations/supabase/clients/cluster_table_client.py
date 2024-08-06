@@ -1,7 +1,7 @@
 from typing import List
 
-from database.supabase.clients.data_repository import DataRepository
-from database.supabase.models.cluster import Cluster
+from integrations.supabase.clients.data_repository import DataRepository
+from integrations.supabase.models.cluster import Cluster
 
 
 class ClusterTableClient(DataRepository[Cluster]):

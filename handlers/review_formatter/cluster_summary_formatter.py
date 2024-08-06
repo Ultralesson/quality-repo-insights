@@ -1,18 +1,18 @@
 from typing import List, Dict
 
 from code_review.parsers import ClusterSummary, FileReview
-from code_review.review_components.models import ClusterInfo
-from code_review.review_formatter.md_util import get_formatted_li_items
+from code_review.review_components.models import ClusterReviewInfo
+from handlers.review_formatter.md_util import get_formatted_li_items
 
 
-def format_and_write_cluster_review(cluster: ClusterInfo):
+def format_and_write_cluster_review(cluster: ClusterReviewInfo, review_dir: str):
     cluster_summary: ClusterSummary = cluster.summary
     cluster_name = cluster.name
     cluster_file_reviews: Dict[str, FileReview] = cluster.file_reviews
 
     cluster_files = [file_name for file_name, _ in cluster_file_reviews.items()]
     md_content = formatted_cluster_summary(cluster_summary, cluster_files)
-    with open(f"review_output/cluster_reviews/{cluster_name}.md", "w") as md_file:
+    with open(f"{review_dir}/{cluster_name}.md", "w") as md_file:
         md_file.write(md_content)
 
 

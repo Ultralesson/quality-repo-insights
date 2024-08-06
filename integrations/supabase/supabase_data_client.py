@@ -3,13 +3,13 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from code_review.parsers import OverallSummary
-from code_review.review_components.models import ClusterInfo
-from database.supabase.clients import (
+from code_review.review_components.models import ClusterReviewInfo
+from integrations.supabase.clients import (
     ClusterTableClient,
     FileInfoTableClient,
     RepositoryTableClient,
 )
-from database.supabase.models import Cluster, FileInfo, Repository
+from integrations.supabase.models import Cluster, FileInfo, Repository
 
 
 class SupabaseDataClient:
@@ -32,7 +32,7 @@ class SupabaseDataClient:
             self.__supabase_client_lock = threading.Lock()
             self._initialized = True
 
-    async def add_cluster_and_files_to_db(self, cluster_record: list[ClusterInfo]):
+    async def add_cluster_and_files_to_db(self, cluster_record: list[ClusterReviewInfo]):
         loop = asyncio.get_running_loop()
         futures = []
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -44,7 +44,7 @@ class SupabaseDataClient:
 
             await asyncio.gather(*futures)
 
-    def __add_cluster_and_file_info(self, cluster: ClusterInfo):
+    def __add_cluster_and_file_info(self, cluster: ClusterReviewInfo):
         with self.__supabase_client_lock:
             cluster_record = self.__cluster_table_client.add_cluster(
                 Cluster(

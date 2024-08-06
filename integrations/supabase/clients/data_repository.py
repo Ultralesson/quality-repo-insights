@@ -2,7 +2,7 @@ from typing import Dict, Any, Generic, TypeVar, List
 
 from pydantic import BaseModel
 
-from database.supabase.clients.supabase_client import SupabaseClient
+from integrations.supabase.clients.supabase_client import SupabaseClient
 from supabase.client import Client
 
 T = TypeVar("T", bound=BaseModel)
@@ -10,8 +10,8 @@ T = TypeVar("T", bound=BaseModel)
 
 class DataRepository(Generic[T]):
     def __init__(self, table_name: str):
-        client: Client = SupabaseClient()
-        self.__table = client.table(table_name)
+        self.__client: Client = SupabaseClient()
+        self.__table = self.__client.table(table_name)
 
     def _select(self, data: Dict[str, Any]) -> List[T]:
         try:

@@ -10,3 +10,5 @@ class Repository(BaseModel):
     name: Optional[str] = None
     url: Optional[str] = None
     overall_summary: Optional[OverallSummary] = None
+    last_reviewed_commit: Optional[str] = None
+    branch: Optional[str] = None

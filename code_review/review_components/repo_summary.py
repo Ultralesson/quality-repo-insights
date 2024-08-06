@@ -8,7 +8,7 @@ from code_review.parsers import OverallSummary
 from code_review.prompts import OVERALL_SUMMARY_PROMPT
 import json
 
-from code_review.review_components.models import ClusterInfo
+from code_review.review_components.models import ClusterReviewInfo
 
 
 class RepoSummarizer:
@@ -16,7 +16,7 @@ class RepoSummarizer:
         self.__llm = ChatOpenAI(model=model, temperature=0.7)
         self.__parser = PydanticOutputParser(pydantic_object=OverallSummary)
 
-    async def summarize_feedback(self, clusters: List[ClusterInfo]) -> OverallSummary:
+    async def summarize_feedback(self, clusters: List[ClusterReviewInfo]) -> OverallSummary:
         cluster_summaries_history = ChatMessageHistory()
 
         for cluster_info in clusters:
