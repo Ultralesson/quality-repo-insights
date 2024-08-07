@@ -16,7 +16,7 @@ class ReviewLookupHandler:
     @staticmethod
     def review_exists(repo_path):
         repo = RepositoryTableClient().get_repository(repo_path)
-        return len(repo) > 0
+        return len(repo) > 0 and repo[0]["overall_summary"] != ""
 
     @staticmethod
     def get_review(repo_info: RepoInfo) -> Review:

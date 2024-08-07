@@ -31,6 +31,7 @@ OVERALL_SUMMARY_PROMPT = ChatPromptTemplate.from_messages(
 
         Do not make assumptions about specific tools or frameworks unless they are explicitly mentioned in the summaries.
         Don't expect to see traditional unit tests unless explicitly mentioned.
+        Please ensure that the summary does not emphasize documentation-related issues or recommendations.
 
         Please structure your response according to the following format:
         {format_instructions}

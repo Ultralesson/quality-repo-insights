@@ -77,7 +77,7 @@ class UserRepoInfoHandler:
         git_client = LocalGitClient(repo_path)
 
         if not git_client.git_initialized():
-            return None, None
+            return "", ""
 
         default_branch = git_client.get_default_branch()
         head_commit_sha = git_client.get_head_commit()

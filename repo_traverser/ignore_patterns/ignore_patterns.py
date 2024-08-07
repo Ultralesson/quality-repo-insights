@@ -62,6 +62,7 @@ IGNORE_PATTERNS = [
     "coverage",
     "dist",
     "node_modules",
+    "package-lock.json"
     # Python
     ".venv",
     "__pycache__",
@@ -82,6 +83,7 @@ IGNORE_PATTERNS = [
     "*.zip",
     "*.tar.gz",
     "*.rar",
+    "*.bat",
     ".loadpath",
     ".recommenders",
     ".externalToolBuilders/*",

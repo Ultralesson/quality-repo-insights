@@ -31,3 +31,6 @@ class FileReview(BaseModel):
     recommendations: List[str] = Field(
         description="Specific recommendations for improving this file"
     )
+    summary: str = Field(
+        description="A concise yet comprehensive summary (2-3 sentences) of the file's primary function, key features, and its role in the test automation suite. Focus on test design, code quality, and unique characteristics that distinguish this file."
+    )

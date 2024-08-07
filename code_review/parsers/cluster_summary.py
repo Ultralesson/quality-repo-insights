@@ -33,7 +33,7 @@ class ClusterSummary(BaseModel):
     )
     strengths: List[str] = Field(description="Key strengths observed in this cluster")
     areas_for_improvement: List[str] = Field(
-        description="Main areas for improvement in this cluster"
+        description="Main areas for improvement in this cluster, excluding documentation-related issues"
     )
     cluster_recommendations: List[str] = Field(
         description="Key recommendations for improving this cluster as a whole"

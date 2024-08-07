@@ -7,7 +7,6 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from code_review.parsers import ClusterSummary
 from code_review.parsers.file_review import FileReview
 from code_review.prompts.cluster_review_prompt import CLUSTER_FILES_SUMMARIZATION_PROMPT
-import json
 
 from code_review.review_components.models import ClusterReviewInfo
 
@@ -27,13 +26,11 @@ class ClusterSummarizer:
 
         for cluster_name, cluster_files in clusters.items():
             cluster_file_reviews: Dict[str, FileReview] = {}
+
             for file_name, review in cluster_files.items():
-                review_str = json.dumps(
-                    review.model_dump(exclude_none=True, exclude_unset=True)
-                )
                 cluster_file_reviews[file_name] = review
                 summary_history.add_user_message(
-                    f"# File Name: {file_name}\n\n# Review:\n{review_str}"
+                    f"# File Type: {review.file_type}\n\n# Review:\n{review.summary}"
                 )
 
             summarization_chain = (

@@ -19,12 +19,12 @@ FILE_REVIEW_PROMPT = ChatPromptTemplate.from_messages(
         6. Utility: Helper functions or classes used across the test suite
         7. Test Helper: Specific helpers for test execution, assertion, or validation
         8. Test Suite: Collection of test cases or test organization
-        9. Mock/Stub: Mock objects or stub implementations for testing
-        10. Logging/Reporting: Components for test logging or report generation
-        11. CI/CD Config: Configuration files for continuous integration/deployment
+        9. Mock or Stub: Mock objects or stub implementations for testing
+        10. Logging or Reporting: Components for test logging or report generation
+        11. CI or CD Config: Configuration files for continuous integration/deployment
         12. Documentation: README files, test plans, or other documentation
         13. Framework Core: Core components of the test automation framework
-        14. Mobile Page/Screen Object: Representation of mobile app screens, pages, or components
+        14. Mobile Page or Screen Object: Representation of mobile app screens, pages, or components
         15. Test Runner: Scripts or configurations for executing tests
         16. Locator Repository: Centralized storage for element locators
         17. Performance Test Script: Scripts specific to performance or load testing
@@ -54,9 +54,13 @@ FILE_REVIEW_PROMPT = ChatPromptTemplate.from_messages(
         5. If unsure, provide your best guess and briefly explain your reasoning.
         6. For files that don't clearly fit into any category, use "Other" and explain why.
 
-        Example classification:
-        File: test_login.py
-        Category: Test Script
+        Summarize this file in 2-3 sentences. Your summary should:
+        1. Clearly state the file's primary function and its role in the test automation suite.
+        2. Highlight key features or techniques used in the file that contribute to effective testing.
+        3. Mention any unique characteristics or patterns that distinguish this file.
+        4. If applicable, briefly note how this file contributes to overall test coverage or suite effectiveness.
+
+        Focus on test design, code quality, and testing effectiveness. Do not emphasize documentation or comments in the code.
 
         Please structure your review according to the following format:
         {format_instructions}
@@ -83,12 +87,13 @@ FILE_REVIEW_PROMPT = ChatPromptTemplate.from_messages(
         ),
         HumanMessagePromptTemplate.from_template(
             """
-        Based on the code segments in the chat history, provide a comprehensive summary of the file {file_name}. 
-        Start by clearly stating the file type from the provided categories, then ensure your review covers all aspects required by the output format, including the main purpose, key points, code quality, best practices, complexity, maintainability, and specific recommendations.
-        Your review should be thorough yet concise, highlighting the most important aspects of the code in the context of test automation and quality assurance. 
-        Explain how this file contributes to the overall testing strategy (e.g., API testing, Web UI testing, Mobile testing, or cross-cutting concerns like data management or reporting).
-        Also, discuss any potential security concerns or performance implications, and how this file interacts with or depends on other parts of the test suite or framework.
-        If the file doesn't clearly fit into any category, use "Other" and provide a detailed explanation.
+        - Based on the code segments in the chat history, provide a comprehensive summary of the file {file_name}. 
+        
+        - Start by clearly stating the file type from the provided categories, then ensure your review covers all aspects required by the output format, including the main purpose, key points, code quality, best practices, complexity, maintainability, and specific recommendations. If the file doesn't clearly fit into any category, use "Other".
+        
+        - Your review should be thorough yet concise, highlighting the most important aspects of the code in the context of test automation and quality assurance. 
+        
+        - Explain how this file contributes to the overall testing strategy (e.g., API testing, Web UI testing, Mobile testing, or cross-cutting concerns like data management or reporting).
         """
         ),
     ]

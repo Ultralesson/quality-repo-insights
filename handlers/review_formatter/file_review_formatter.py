@@ -1,3 +1,5 @@
+import os
+
 from code_review.parsers import FileReview
 from handlers.review_formatter.md_util import get_formatted_li_items
 
@@ -36,5 +38,9 @@ def create_file_review_md(file_name: str, review_summary: FileReview, review_dir
 {'\n'.join(get_formatted_li_items(review_summary.recommendations))}
 """
 
-    with open(f"{review_dir}/{file_name.replace(".", "_")}.md", "w") as md_file:
+    file = file_name.split("\\")[-1].replace(".", "_").replace(" ", "")
+    file_folder = file_name.replace(file, "").replace(".", "_").replace(" ", "")
+    os.makedirs(f"{review_dir}/{file_folder}", exist_ok=True)
+
+    with open(f"{review_dir}/{file_folder}/{file}.md", "w") as md_file:
         md_file.write(md_content)

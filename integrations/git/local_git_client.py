@@ -1,6 +1,7 @@
 from typing import List
+from warnings import warn
 
-from git import Repo
+from git import Repo, InvalidGitRepositoryError
 
 
 class LocalGitClient:
@@ -25,7 +26,11 @@ class LocalGitClient:
 
     @property
     def __repo(self):
-        repo = Repo(self.__repo_path)
-        if repo.bare:
+        try:
+            repo = Repo(self.__repo_path)
+            if repo.bare:
+                return None
+            return repo
+        except InvalidGitRepositoryError as e:
+            warn(str(e))
             return None
-        return repo
