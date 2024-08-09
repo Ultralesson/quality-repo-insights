@@ -1,186 +1,112 @@
-import re
+from tree_sitter import Node
+from tree_sitter_java import language
 
-import javalang as jl
-from javalang.tree import (
-    ClassDeclaration,
-    MethodDeclaration,
-    ConstructorDeclaration,
-    FieldDeclaration,
-    EnumDeclaration,
-    InterfaceDeclaration
-)
-
-from chunker.models import JavaFileElements, JavaClassInfo
+from chunker.chunker import Chunker
+from chunker.models import JavaClassInfo, JavaFileElements
 
 
-class JavaFileChunker:
+class JavaFileChunker(Chunker):
 
     def chunk_file(self, content: str):
-        java_file_elements: JavaFileElements = JavaFileElements()
-        content = self.format_java_code_with(content)
+        java_file_elements = JavaFileElements()
 
-        tokens = list(jl.tokenizer.tokenize(content))
-        parser = jl.parser.Parser(tokens)
-        tree = parser.parse()
+        parser = self._parser(language())
+        tree = parser.parse(bytes(content, "utf8"))
+        nodes = tree.root_node.children
 
-        java_file_elements.package = tree.package.name
-        java_file_elements.imports = [f"import {file_import.path}" for file_import in tree.imports]
-
-        types = tree.types
-
-        for compilation_unit in types:
-            if isinstance(compilation_unit, ClassDeclaration):
-                class_info = self.__parse_class(tokens, content, compilation_unit)
-                java_file_elements.classes.append(class_info)
-
-            elif isinstance(compilation_unit, (EnumDeclaration, InterfaceDeclaration)):
-                start_line = compilation_unit.position.line if compilation_unit.position else 0
-                end_line = self.__find_end_line_using_tokens(tokens, start_line, '{', '}')
-                extracted_content = self.__extract_content(content, start_line, end_line)
-
-                if isinstance(compilation_unit, EnumDeclaration):
-                    java_file_elements.enums.append(extracted_content)
-
-                if isinstance(compilation_unit, InterfaceDeclaration):
-                    java_file_elements.interfaces.append(extracted_content)
+        java_file_elements.package = self.__get_node_text(nodes, "package_declaration")
+        java_file_elements.imports = self.__get_all_nodes_text(nodes, "import_declaration")
+        java_file_elements.enums = self.__get_all_nodes_text(nodes, "enum_declaration")
+        java_file_elements.interfaces = self.__get_all_nodes_text(nodes, "interface_declaration")
+        java_file_elements.class_info = self.__parse_class(nodes)
 
         return java_file_elements
 
-    def __parse_class(self, tokens, content, class_declaration):
-        if isinstance(class_declaration, ClassDeclaration):
-            class_name = getattr(class_declaration, 'name', None)
-            class_modifier_match = re.search(r"{'(.*?)'}", str(getattr(class_declaration, 'modifiers', None)))
-            class_modifier = class_modifier_match.group(1) if class_modifier_match else ""
-            extends_value = getattr(class_declaration, 'extends', None)
-            extends = extends_value.name if extends_value else ""
-            implements_attr = getattr(class_declaration, 'implements')
-            implements = [implements.name for implements in implements_attr] if implements_attr else []
+    def __parse_class(self, nodes: list[Node]):
+        class_node = self.__get_first_matching_node(nodes, "class_declaration")
 
-            constructors = []
-            component_fields = []
-            methods = []
-            inner_classes = []
+        if not class_node:
+            return None
 
-            # Process constructors
-            for constructor in class_declaration.constructors:
-                start_line = self.__find_start_line_with_annotations(constructor, content)
-                end_line = self.__find_end_line_using_tokens(tokens, start_line, start_brace='{', end_brace='}')
-                constructor_content = self.__extract_content(content, start_line, end_line)
-                constructors.append(constructor_content)
+        children = class_node.children
 
-            # Process fields
-            for field in class_declaration.fields:
-                start_line = self.__find_start_line_with_annotations(field, content)
-                end_line = self.__find_end_line_using_tokens(tokens, start_line, "", ";")
-                field_content = self.__extract_content(content, start_line, end_line)
-                component_fields.append(field_content)
+        class_constructors = []
+        class_fields = []
+        class_methods = []
 
-            # Process methods
-            for method in class_declaration.methods:
-                start_line = self.__find_start_line_with_annotations(method, content)
-                end_line = self.__find_end_line_using_tokens(tokens, start_line, start_brace='{', end_brace='}')
-                method_content = self.__extract_content(content, start_line, end_line)
-                methods.append(method_content)
+        class_name = self.__get_node_text(children, "identifier")
+        class_modifier = self.__get_first_matching_node_last_child_text(children, "modifiers")
+        modifiers = self.__get_first_matching_node(children, "modifiers")
+        class_annotations = self.__get_all_nodes_text(modifiers.children, "annotation")
+        super_class = self.__get_first_matching_node_first_child_text(
+            children, "superclass", "identifier"
+        )
+        super_interfaces = self.__get_first_matching_node_first_child_text(
+            children, "super_interfaces", "type_list"
+        )
+        class_body = self.__get_first_matching_node(children, "class_body")
+        if class_body and len(class_body.children) > 0:
+            class_body_children = class_body.children
+            class_constructors = self.__get_all_nodes_text(class_body_children, "constructor_declaration")
+            class_fields = self.__get_all_nodes_text(class_body_children,  "field_declaration")
+            class_methods = self.__get_all_nodes_text(class_body_children, "method_declaration")
 
-            body = getattr(class_declaration, 'body', None)
-            if body:
-                for item in body:
-                    if isinstance(item, ClassDeclaration):
-                        inner_class_info = self.__parse_class(tokens, content, item)
-                        inner_classes.append(inner_class_info)
+        return JavaClassInfo(
+            class_name=class_name,
+            class_modifier=class_modifier,
+            super_class=super_class,
+            super_interfaces=str(super_interfaces).split(","),
+            class_annotations=class_annotations,
+            class_fields=class_fields,
+            class_constructors=class_constructors,
+            class_methods=class_methods
+        )
 
-            class_info = JavaClassInfo(
-                class_name=class_name,
-                class_modifier=class_modifier,
-                extends=extends,
-                implements=implements,
-                fields=component_fields,
-                constructors=constructors,
-                methods=methods,
-                inner_classes=inner_classes
-            )
+    def __get_node_text(self, nodes: list[Node], grammar_name: str) -> str | None:
+        node = self.__get_first_matching_node(nodes, grammar_name)
+        return node.text if node else None
 
-            return class_info
+    def __get_all_nodes_text(self, nodes: list[Node], grammar_name: str) -> list[str]:
+        matching_nodes = self.__filter_nodes(nodes, grammar_name)
+        texts = []
+        if len(matching_nodes) > 0:
+            texts = [str(node.text) for node in matching_nodes]
 
-    @staticmethod
-    def __find_start_line_with_annotations(node, content):
-        annotations = []
-        start_pos = node.position.line
+        return texts
 
-        if isinstance(node, (FieldDeclaration, MethodDeclaration, ConstructorDeclaration)):
-            annotations = getattr(node, 'annotations', [])
+    def __get_first_matching_node(self, nodes: list[Node], grammar_name: str) -> Node | None:
+        nodes = self.__filter_nodes(nodes, grammar_name)
+        return nodes[0] if len(nodes) > 0 else None
 
-        if annotations:
-            start_pos = annotations[0].position.line - 1
-
-            prev_line = start_pos - 1
-            while prev_line >= 0:
-                line_content = content.splitlines()[prev_line]
-                if line_content and line_content.startswith('@'):
-                    break
-                elif line_content:
-                    start_pos = prev_line + 1
-                    break
-
-                prev_line -= 1
-
-        return start_pos
-
-    @staticmethod
-    def __find_end_line_using_tokens(tokens, start_line, start_brace='{', end_brace='}'):
-        brace_count = 0
-        end_line = start_line
-
-        for token in tokens:
-            token_line, token_value = token.position[0], token.value
-            if token_line >= start_line:
-                if token_value == start_brace:
-                    brace_count += 1
-                elif token_value == end_brace:
-                    brace_count -= 1
-                    if brace_count == 0:
-                        end_line = token_line
-                        break
-
-        if brace_count > 0:
-            end_line = max(token.position[0] for token in tokens)
-
-        return end_line
-
-    @staticmethod
-    def __extract_content(content, start_line, end_line):
-        lines = content.splitlines()
-        if end_line < start_line:
-            return ""
-        return "\n".join(lines[start_line - 1:end_line]).strip()
-
-    @staticmethod
-    def format_java_code_with(code):
-        code = code.strip()
-
-        # Add newlines after semicolons and opening braces
-        code = re.sub(r';(?!\s*$)', ';\n', code)
-        code = re.sub(r'{(?!\s*$)', '{\n', code)
-
-        # Add newlines before and after closing braces
-        code = re.sub(r'(?<!\s)}', '\n}', code)
-        code = re.sub(r'}(?!\s*$)', '}\n', code)
-
-        # Indent the code
-        lines = code.split('\n')
-        indent = 0
-        beautified_lines = []
-        for line in lines:
-            line = line.strip()
-            if line.endswith('{'):
-                beautified_lines.append('    ' * indent + line)
-                indent += 1
-            elif line.startswith('}'):
-                indent = max(0, indent - 1)
-                beautified_lines.append('    ' * indent + line)
-                if not line.endswith(';'):
-                    beautified_lines.append('')
+    def __get_first_matching_node_first_child_text(
+            self,
+            nodes: list[Node],
+            parent_grammar_text: str,
+            child_grammar_text: str = None) -> str:
+        text = ""
+        node = self.__get_first_matching_node(nodes, parent_grammar_text)
+        if node and len(node.children) > 0:
+            if child_grammar_text is None:
+                text = node.children[-1].text
             else:
-                beautified_lines.append('    ' * indent + line)
+                text = self.__get_node_text(node.children, child_grammar_text)
+        return text
 
-        return '\n'.join(beautified_lines)
+    def __get_first_matching_node_last_child_text(
+            self,
+            nodes: list[Node],
+            parent_grammar_text: str
+    ) -> str:
+        text = ""
+        node = self.__get_first_matching_node(nodes, parent_grammar_text)
+        if node and len(node.children) > 0:
+            text = node.children[-1].text
+        return text
+
+    @staticmethod
+    def __filter_nodes(nodes: list[Node], grammar_name: str) -> list[Node]:
+        return list(filter(lambda node: node.grammar_name == grammar_name, nodes))
+
+
+
+

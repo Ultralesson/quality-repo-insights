@@ -20,6 +20,10 @@ langchain-community = "*"
 requests = "*"
 gitpython = "*"
 langchain-ollama = "*"
+tree-sitter = "*"
+tree-sitter-typescript = "*"
+tree-sitter-java = "*"
+tree-sitter-javascript = "*"
 
 [dev-packages]
 

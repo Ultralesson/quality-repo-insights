@@ -8,6 +8,6 @@ from chunker.models import JavaClassInfo
 class JavaFileElements(BaseModel):
     package: str = None
     imports: List[str] = []
-    classes: List[JavaClassInfo] = []
+    class_info: List[JavaClassInfo] = []
     enums: List[str] = []
     interfaces: List[str] = []
