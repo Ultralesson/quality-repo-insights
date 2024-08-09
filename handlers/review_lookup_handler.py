@@ -2,13 +2,13 @@ from typing import List, Dict
 
 from code_review.parsers import FileReview
 from code_review.review_components.models import ClusterReviewInfo
+from handlers.models import RepoInfo
 from handlers.models.review import Review
 from integrations.supabase.clients import (
     RepositoryTableClient,
     ClusterTableClient,
     FileInfoTableClient,
 )
-from handlers.models import RepoInfo
 
 
 class ReviewLookupHandler:
@@ -16,7 +16,7 @@ class ReviewLookupHandler:
     @staticmethod
     def review_exists(repo_path):
         repo = RepositoryTableClient().get_repository(repo_path)
-        return len(repo) > 0 and repo[0]["overall_summary"] != ""
+        return len(repo) > 0 and repo[0]["overall_summary"] is not None
 
     @staticmethod
     def get_review(repo_info: RepoInfo) -> Review:

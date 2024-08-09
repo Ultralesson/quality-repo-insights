@@ -1,8 +1,9 @@
 import asyncio
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List
 
+from chunker import JavaFileChunker
 from repo_traverser.ignore_patterns.ignore_patterns import IGNORE_PATTERNS
 from repo_traverser.traverser import Traverser
 
@@ -58,7 +59,7 @@ class LocalRepoTraverser(Traverser):
         try:
             with open(file, "r", encoding="utf-8") as f:
                 content = f.read()
-                chunks = self._split_text_into_chunks(content)
+                chunks = JavaFileChunker().chunk_file(content) if file_name.endswith(".java") else []
                 return rel_file_name, chunks
         except Exception as e:
             print(f"Could not read file {file}: {e}")

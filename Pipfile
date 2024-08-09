@@ -19,6 +19,7 @@ pygithub = "*"
 langchain-community = "*"
 requests = "*"
 gitpython = "*"
+langchain-ollama = "*"
 
 [dev-packages]
 
