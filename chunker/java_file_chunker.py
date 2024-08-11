@@ -8,6 +8,9 @@ from chunker.models import JavaClassInfo, JavaFileElements
 class JavaFileChunker(Chunker):
 
     def chunk_file(self, content: str):
+        if content.__contains__("class USDRatesServiceClient"):
+            pass
+
         java_file_elements = JavaFileElements()
 
         parser = self._parser(language())
@@ -24,21 +27,24 @@ class JavaFileChunker(Chunker):
         java_file_elements.interfaces = self.__get_all_nodes_text(
             nodes, "interface_declaration"
         )
-        java_file_elements.class_info = self.__parse_class(nodes)
+
+        class_node = self.__get_first_matching_node(nodes, "class_declaration")
+
+        if class_node:
+            java_file_elements.class_info = self.__parse_class(class_node)
 
         return java_file_elements.model_dump()
 
-    def __parse_class(self, nodes: list[Node]):
-        class_node = self.__get_first_matching_node(nodes, "class_declaration")
-
-        if not class_node:
-            return None
-
+    def __parse_class(self, class_node: Node):
         children = class_node.children
 
         class_constructors = []
         class_fields = []
         class_methods = []
+        inner_classes = []
+        enums = []
+        interfaces = []
+        class_annotations = []
 
         class_comments = self.__get_block_comment(class_node)
         class_name = self.__get_node_text_matching_grammar_name(children, "identifier")
@@ -46,13 +52,19 @@ class JavaFileChunker(Chunker):
             children, "modifiers"
         )
         modifiers = self.__get_first_matching_node(children, "modifiers")
-        class_annotations = self.__get_all_nodes_text(modifiers.children, "annotation")
+        if modifiers and len(modifiers.children) > 0:
+            class_annotations = self.__get_all_nodes_text(
+                modifiers.children, "annotation"
+            )
+
         super_class = self.__get_first_matching_node_first_child_text(
             children, "superclass", "identifier"
         )
+
         super_interfaces = self.__get_first_matching_node_first_child_text(
             children, "super_interfaces", "type_list"
         )
+
         class_body = self.__get_first_matching_node(children, "class_body")
         if class_body and len(class_body.children) > 0:
             class_body_children = class_body.children
@@ -66,6 +78,20 @@ class JavaFileChunker(Chunker):
                 class_body_children, "method_declaration"
             )
 
+            inner_class_nodes = self.__filter_nodes(
+                class_body_children, "class_declaration"
+            )
+
+            enums = self.__get_all_nodes_text(class_body_children, "enum_declaration")
+
+            interfaces = self.__get_all_nodes_text(
+                class_body_children, "interface_declaration"
+            )
+
+            if inner_class_nodes and len(inner_class_nodes) > 0:
+                for inner_class_node in inner_class_nodes:
+                    inner_classes.append(self.__parse_class(inner_class_node))
+
         return JavaClassInfo(
             class_name=class_name,
             class_block_comments=class_comments,
@@ -76,13 +102,16 @@ class JavaFileChunker(Chunker):
             fields=class_fields,
             constructors=class_constructors,
             methods=class_methods,
+            inner_classes=inner_classes,
+            enums=enums,
+            interfaces=interfaces,
         )
 
     def __get_first_matching_node(
         self, nodes: list[Node], grammar_name: str
     ) -> Node | None:
         nodes = self.__filter_nodes(nodes, grammar_name)
-        return nodes[0] if len(nodes) > 0 else None
+        return nodes[0] if nodes and len(nodes) > 0 else None
 
     def __get_first_matching_node_first_child_text(
         self,
@@ -119,7 +148,7 @@ class JavaFileChunker(Chunker):
     def __get_all_nodes_text(self, nodes: list[Node], grammar_name: str) -> list[str]:
         matching_nodes = self.__filter_nodes(nodes, grammar_name)
         texts = []
-        if len(matching_nodes) > 0:
+        if matching_nodes and len(matching_nodes) > 0:
             texts = [
                 self.__get_node_text_with_comments(node) for node in matching_nodes
             ]

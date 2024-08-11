@@ -14,3 +14,5 @@ class JavaClassInfo(BaseModel):
     constructors: List[str] = Field(default=[])
     methods: List[str] = Field(default=[])
     inner_classes: List["JavaClassInfo"] = Field(default=[])
+    enums: List[str] = Field(default=[])
+    interfaces: List[str] = Field(default=[])
