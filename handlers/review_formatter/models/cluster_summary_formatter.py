@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from code_review.parsers import ClusterSummary, FileReview
 from code_review.review_components.models import ClusterReviewInfo
-from handlers.review_formatter.md_util import get_formatted_li_items
+from handlers.review_formatter.models.md_util import get_formatted_li_items
 
 
 def format_and_write_cluster_review(cluster: ClusterReviewInfo, review_dir: str):

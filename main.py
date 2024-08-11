@@ -2,7 +2,7 @@ import asyncio
 
 from dotenv import load_dotenv, find_dotenv
 
-from handlers.md_review_formatter import MDReviewFormatter
+from handlers.review_formatter.md_review_formatter import MDReviewFormatter
 from handlers.models.review import Review
 from handlers.review_handler import ReviewHandler
 from handlers import UserRepoInfoHandler

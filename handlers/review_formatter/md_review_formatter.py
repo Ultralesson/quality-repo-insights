@@ -5,12 +5,12 @@ from typing import Dict, List
 
 from code_review.parsers import OverallSummary, FileReview
 from code_review.review_components.models import ClusterReviewInfo
-from handlers.review_formatter.cluster_summary_formatter import (
+from handlers.review_formatter.models.cluster_summary_formatter import (
     format_and_write_cluster_review,
 )
 
-from handlers.review_formatter.file_review_formatter import create_file_review_md
-from handlers.review_formatter.overall_summary_formatter import (
+from handlers.review_formatter.models.file_review_formatter import create_file_review_md
+from handlers.review_formatter.models.overall_summary_formatter import (
     get_overall_summary_md,
 )
 

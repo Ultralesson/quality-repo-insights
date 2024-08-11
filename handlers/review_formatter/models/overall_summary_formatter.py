@@ -1,5 +1,5 @@
 from code_review.parsers import OverallSummary
-from handlers.review_formatter.md_util import get_formatted_li_items
+from handlers.review_formatter.models.md_util import get_formatted_li_items
 
 
 def get_overall_summary_md(final_summary: OverallSummary):

@@ -1,19 +1,24 @@
+import os
 from abc import abstractmethod
 from typing import Dict, List
 
-from transformers import AutoTokenizer, AutoModel
+from chunker import chunker_mapper
+from chunker.chunker import Chunker
 
 
 class Traverser:
-    def __init__(self, model="microsoft/codebert-base"):
-        self._tokenizer = AutoTokenizer.from_pretrained(model)
-        self._model = AutoModel.from_pretrained(model)
 
     @abstractmethod
     def extract_contents(self) -> Dict[str, List[str]]:
         pass
 
-    def _split_text_into_chunks(self, text, max_tokens=512):
-        tokens = self._tokenizer.encode(text, add_special_tokens=False)
-        chunks = [tokens[i: i + max_tokens] for i in range(0, len(tokens), max_tokens)]
-        return [self._tokenizer.decode(chunk) for chunk in chunks]
+    @staticmethod
+    def _chunk_content(file_name: str, text: str) -> Dict:
+        _, file_extension = os.path.splitext(file_name)
+        file_type = file_extension.lower()
+        if file_type in chunker_mapper:
+            chunker: Chunker = chunker_mapper[file_type]()
+            file_elements = chunker.chunk_file(text)
+            return file_elements
+
+        return {}

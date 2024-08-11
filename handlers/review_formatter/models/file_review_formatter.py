@@ -1,7 +1,7 @@
 import os
 
 from code_review.parsers import FileReview
-from handlers.review_formatter.md_util import get_formatted_li_items
+from handlers.review_formatter.models.md_util import get_formatted_li_items
 
 
 def create_file_review_md(file_name: str, review_summary: FileReview, review_dir: str):

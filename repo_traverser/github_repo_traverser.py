@@ -4,7 +4,7 @@ import re
 import threading
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List
+from typing import Dict
 
 from github import Github, Auth
 
@@ -20,7 +20,7 @@ class GitHubTraverser(Traverser):
         self.__client = Github(auth=Auth.Token(GITHUB_ACCESS_TOKEN))
         self.__embedder_lock = threading.Lock()
 
-    async def extract_contents(self) -> Dict[str, List[str]]:
+    async def extract_contents(self) -> Dict[str, Dict]:
         file_info = {}
         queue = deque([""])
 
@@ -57,7 +57,7 @@ class GitHubTraverser(Traverser):
     def __process_file(self, file_path, repo):
         file_content = repo.get_contents(file_path).decoded_content.decode()
         with self.__embedder_lock:
-            chunks: List[str] = self._split_text_into_chunks(file_content)
+            chunks: Dict = self._chunk_content(file_path, file_content)
         return file_path, chunks
 
     def __extract_repo_details(self):
