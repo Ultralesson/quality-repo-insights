@@ -2,27 +2,18 @@
 
 ## About
 
-This project uses AI to review and categorize code repositories, providing insights into the structure and content of test automation projects. It can analyze both local repositories and GitHub repositories.
+This project leverages AI to review and categorize code repositories, providing valuable insights into the structure and content of test automation projects. It supports analysis of both local and GitHub repositories.
 
 ## Approach
 
-1. **Repository Traversal**: 
-   - Scan through the entire repository (local or GitHub)
-   - Ignore specified files and directories
-   
+- **Repository Traversal and Content Extraction**:
+  - Traverse the repository and extract content
+  - Ignore specified files and directories
 
 
-2. **File Classification**: 
-   - Use LLM to classify each file into predefined categories relevant to test automation
-
-
-3. **Clustering**: 
-   - Group files into clusters based on the LLM-determined categories
-
-
-4. **Review and Summarization**: 
-   - Generate a summary for each cluster
-   - Provide an overall summary of all cluster reviews
+-  **File Review and Summarization**:
+   - Review each file and generate a summary
+   - Summarize all file reviews to provide an overall summary
 
 ## Usage
 
