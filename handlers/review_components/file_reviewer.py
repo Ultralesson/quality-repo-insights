@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 
 from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.language_models import LLM
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
@@ -9,7 +10,7 @@ from handlers.prompts import FILE_REVIEW_PROMPT
 
 
 class FileReviewer:
-    def __init__(self, llm):
+    def __init__(self, llm: LLM):
         self.__llm = llm
         self.__parser = PydanticOutputParser(pydantic_object=FileReview)
 
@@ -39,7 +40,7 @@ class FileReviewer:
         history = InMemoryChatMessageHistory()
         history.add_user_message(content)
 
-        chain = FILE_REVIEW_PROMPT | self.__llm | self.__parser
+        chain = FILE_REVIEW_PROMPT | self.__llm.with_structured_output(FileReview)
 
         chain_with_history = RunnableWithMessageHistory(
             runnable=chain,
@@ -49,18 +50,10 @@ class FileReviewer:
         )
 
         try:
-            file_review = chain_with_history.invoke(
-                input={
-                    "input": f"""
-                Kindly Provide your comprehensive review in the format:
-                {self.__parser.get_format_instructions()}
-                """
-                },
+            file_review: FileReview = chain_with_history.invoke(
+                input={"input": "Kindly Provide your comprehensive review"},
                 config={"configurable": {"session_id": file_name}},
             )
-
-            history.clear()
-
         except Exception as e:
             print(f"Error reviewing {file_name}: {str(e)}")
             file_review = FileReview(overview=str(e))
