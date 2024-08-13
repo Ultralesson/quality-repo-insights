@@ -1,54 +1,34 @@
-from code_review.review_components import (
-    FileReviewer,
-    ClusterSummarizer,
-    RepoSummarizer,
-)
+from handlers.review_components import FileReviewer, ReviewSummarizer
+from config import SUPABASE_URL, SUPABASE_KEY
 from handlers.models import RepoInfo
-from handlers.models.review import Review
 from integrations.supabase import SupabaseDataClient
-from integrations.supabase.clients import RepositoryTableClient
-from integrations.supabase.models import Repository
+from llm.clients import gpt_4o_mini_llm
 from repo_traverser import GitHubTraverser, LocalRepoTraverser
 
 
 class ReviewHandler:
 
     @staticmethod
-    async def review_repo(repo_info: RepoInfo) -> Review:
-        repo = RepositoryTableClient().add_repository(
-            Repository(
-                name=repo_info.name,
-                url=repo_info.repo_path,
-                last_reviewed_commit=repo_info.head_commit_sha,
-                branch=repo_info.branch,
-            )
-        )
-
-        supabase_data_client = SupabaseDataClient(repo["id"])
-
+    async def review_repo(repo_info: RepoInfo, llm=gpt_4o_mini_llm()):
         traverser = (
             GitHubTraverser(repo_info.repo_path)
             if repo_info.type.lower() == "github"
             else LocalRepoTraverser(repo_info.repo_path)
         )
 
-        # Traverse Repo and review files
+        # Extract Files and its contents
         files_info = await traverser.extract_contents()
-        files_reviews = await FileReviewer().review_files(files_info)
 
-        # Create and Summarize Cluster
-        clusters_reviews = await ClusterSummarizer().cluster_and_summarize(
-            files_reviews
-        )
-        await supabase_data_client.add_cluster_and_files_to_db(clusters_reviews)
+        # Review Files
+        files_reviews = await FileReviewer(llm).review_files(files_info)
 
-        # Summarize Clusters and save to db
-        overall_summary = await RepoSummarizer().summarize_feedback(clusters_reviews)
-        supabase_data_client.add_overall_review_to_db(overall_summary)
+        # Summarize reviews
+        final_review = await ReviewSummarizer(llm).summarize_reviews(files_reviews)
 
-        return Review(
-            repo_id=repo["id"],
-            overall_summary=overall_summary,
-            cluster_reviews=clusters_reviews,
-            file_reviews=files_reviews,
-        )
+        if SUPABASE_URL and SUPABASE_KEY:
+            supabase_data_client = SupabaseDataClient()
+            repo_id = supabase_data_client.add_repository(repo_info)
+            await supabase_data_client.add_files_to_db(repo_id, files_reviews)
+            supabase_data_client.add_overall_review_to_db(repo_id, final_review)
+
+        return final_review, files_reviews

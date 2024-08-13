@@ -4,7 +4,7 @@ import re
 import threading
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List
+from typing import Dict
 
 from github import Github, Auth
 
@@ -20,7 +20,7 @@ class GitHubTraverser(Traverser):
         self.__client = Github(auth=Auth.Token(GITHUB_ACCESS_TOKEN))
         self.__embedder_lock = threading.Lock()
 
-    async def extract_contents(self) -> Dict[str, List[str]]:
+    async def extract_contents(self) -> Dict[str, str]:
         file_info = {}
         queue = deque([""])
 
@@ -49,16 +49,15 @@ class GitHubTraverser(Traverser):
             results = await asyncio.gather(*futures)
 
             for result in results:
-                file_name, chunks = result
-                file_info[file_name] = chunks
+                file_name, content = result
+                file_info[file_name] = content
 
         return file_info
 
-    def __process_file(self, file_path, repo):
+    @staticmethod
+    def __process_file(file_path, repo):
         file_content = repo.get_contents(file_path).decoded_content.decode()
-        with self.__embedder_lock:
-            chunks: List[str] = self._split_text_into_chunks(file_content)
-        return file_path, chunks
+        return file_path, file_content
 
     def __extract_repo_details(self):
         pattern = r"https://github.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)"

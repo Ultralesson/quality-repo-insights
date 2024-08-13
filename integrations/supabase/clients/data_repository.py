@@ -1,9 +1,9 @@
 from typing import Dict, Any, Generic, TypeVar, List
 
 from pydantic import BaseModel
+from supabase.client import Client
 
 from integrations.supabase.clients.supabase_client import SupabaseClient
-from supabase.client import Client
 
 T = TypeVar("T", bound=BaseModel)
 

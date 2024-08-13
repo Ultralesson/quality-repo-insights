@@ -17,9 +17,9 @@ class RepositoryTableClient(DataRepository[Repository]):
 
         return response[0]
 
-    def update_repository(self, data: Repository, id: str) -> List[Repository]:
+    def update_repository(self, data: Repository, repo_id: str) -> List[Repository]:
         return self._update(
-            data.model_dump(exclude_unset=True, exclude_none=True), {"id": id}
+            data.model_dump(exclude_unset=True, exclude_none=True), {"id": repo_id}
         )
 
     def get_repository(self, url: str):
