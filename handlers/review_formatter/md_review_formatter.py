@@ -1,18 +1,10 @@
 import asyncio
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List
+from typing import Dict
 
-from code_review.parsers import OverallSummary, FileReview
-from code_review.review_components.models import ClusterReviewInfo
-from handlers.review_formatter.models.cluster_summary_formatter import (
-    format_and_write_cluster_review,
-)
-
+from handlers.models import FileReview
 from handlers.review_formatter.models.file_review_formatter import create_file_review_md
-from handlers.review_formatter.models.overall_summary_formatter import (
-    get_overall_summary_md,
-)
 
 
 class MDReviewFormatter:
@@ -22,27 +14,9 @@ class MDReviewFormatter:
         os.makedirs(f"{self.__review_folder}/cluster_reviews", exist_ok=True)
         os.makedirs(f"{self.__review_folder}/file_reviews", exist_ok=True)
 
-    def create_overall_summary_md_file(self, overall_summary: OverallSummary):
-        md_content = get_overall_summary_md(overall_summary)
+    def create_overall_summary_md_file(self, overall_summary: str):
         with open(f"{self.__review_folder}/overall_summary.md", "w") as md_file:
-            md_file.write(md_content)
-
-    async def create_cluster_summary_md_files(
-        self, cluster_info: List[ClusterReviewInfo]
-    ):
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            loop = asyncio.get_event_loop()
-            futures = []
-            for cluster in cluster_info:
-                future = loop.run_in_executor(
-                    executor,
-                    format_and_write_cluster_review,
-                    cluster,
-                    f"{self.__review_folder}/cluster_reviews",
-                )
-                futures.append(future)
-
-            await asyncio.gather(*futures)
+            md_file.write(overall_summary)
 
     async def create_file_review_md_files(self, file_reviews: Dict[str, FileReview]):
         loop = asyncio.get_event_loop()

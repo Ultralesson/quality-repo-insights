@@ -35,6 +35,6 @@ class FileInfoTableClient(DataRepository[FileInfo]):
 
         return self._select(filter_condition)
 
-    def get_cluster_files(self, cluster_id):
-        filter_condition = {"cluster_id": cluster_id, "repo_id": self.__repo_id}
+    def get_repo_files(self):
+        filter_condition = {"repo_id": self.__repo_id}
         return self._select(filter_condition)

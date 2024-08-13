@@ -1,41 +1,28 @@
 import os
 
-from code_review.parsers import FileReview
-from handlers.review_formatter.models.md_util import get_formatted_li_items
+from handlers.models import FileReview
 
 
 def create_file_review_md(file_name: str, review_summary: FileReview, review_dir: str):
-    md_content = f"""## Main Purpose:
+    md_content = f"""## Overview:
 
-{review_summary.main_purpose}
+{review_summary.overview}
 
-## Key Points
+## Imports and Library Implementations
 
-{'\n'.join(get_formatted_li_items(review_summary.key_points))}
+{review_summary.imports_and_library_implementation}
 
-## File Type
+## Logic and Implementation
 
-{review_summary.file_type}
+{review_summary.logic_and_implementation}
 
-## Code Quality
+## Best Practices and Conventions
 
-{review_summary.code_quality}
+{review_summary.best_practices_and_conventions}
 
-## Best Practices
+## Actionable Suggestions
 
-{'\n'.join(get_formatted_li_items(review_summary.best_practices))}
-
-## Complexity
-
-{review_summary.complexity_assessment}
-
-## Maintainability
-
-{review_summary.maintainability}
-
-## Recommendations
-
-{'\n'.join(get_formatted_li_items(review_summary.recommendations))}
+{review_summary.actionable_suggestions}
 """
 
     file = file_name.split("\\")[-1].replace(".", "_").replace(" ", "")

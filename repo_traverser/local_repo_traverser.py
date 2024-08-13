@@ -62,8 +62,8 @@ class LocalRepoTraverser(Traverser):
             results = await asyncio.gather(*futures)
 
             for result in results:
-                file_name, chunks = result
-                file_info[file_name] = chunks
+                file_name, content = result
+                file_info[file_name] = content
 
         return file_info
 
@@ -73,8 +73,7 @@ class LocalRepoTraverser(Traverser):
         try:
             with open(file, "r", encoding="utf-8") as f:
                 content = f.read()
-                parsed_content = self._chunk_content(file_name, content)
-                return rel_file_name, parsed_content
+                return rel_file_name, content
         except Exception as e:
             print(f"Could not read file {file}: {e}")
             return rel_file_name, None

@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class FileReviewParser(BaseModel):
+class FileReview(BaseModel):
     overview: str = Field(
         description="Overview of the file's purpose and functionality."
     )

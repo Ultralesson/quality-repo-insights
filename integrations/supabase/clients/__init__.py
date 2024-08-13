@@ -1,3 +1,2 @@
-from .repository_table_client import RepositoryTableClient
-from .cluster_table_client import ClusterTableClient
 from .fileinfo_table_client import FileInfoTableClient
+from .repository_table_client import RepositoryTableClient

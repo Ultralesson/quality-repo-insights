@@ -1,13 +1,12 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
-from code_review.parsers import FileReview
+from handlers.models import FileReview
 
 
 class FileInfo(BaseModel):
     id: Optional[str] = None
     file_name: str = None
     file_review: FileReview = None
-    cluster_id: str = None
     repo_id: str = None

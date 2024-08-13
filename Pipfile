@@ -4,26 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-langchain = "*"
+langchain = "0.2.10"
 openai = "*"
 tiktoken = "*"
 langchain-openai = "*"
 python-dotenv = "*"
-huggingface-hub = "*"
-langchain-huggingface = "*"
-sentence-transformers = "*"
-transformers = "*"
-torch = "*"
 supabase = "*"
 pygithub = "*"
-langchain-community = "*"
+langchain-community = "0.2.9"
 requests = "*"
 gitpython = "*"
-langchain-ollama = "*"
-tree-sitter = "*"
-tree-sitter-typescript = "*"
-tree-sitter-java = "*"
-tree-sitter-javascript = "*"
 
 [dev-packages]
 
