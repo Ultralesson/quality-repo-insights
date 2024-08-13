@@ -21,8 +21,7 @@ class ReviewLookupHandler:
         repo_files = FileInfoTableClient(repo_id).get_repo_files()
 
         file_reviews = {
-            file_info["file_name"]: file_info["file_review"]
-            for file_info in repo_files
+            file_info["file_name"]: file_info["file_review"] for file_info in repo_files
         }
 
         return overall_summary, file_reviews

@@ -29,7 +29,7 @@ class SupabaseDataClient:
             self._initialized = True
 
     @staticmethod
-    def add_repository(repo_info: RepoInfo)-> str:
+    def add_repository(repo_info: RepoInfo) -> str:
         repo = RepositoryTableClient().add_repository(
             Repository(
                 name=repo_info.name,
@@ -48,28 +48,21 @@ class SupabaseDataClient:
         with ThreadPoolExecutor(max_workers=5) as executor:
             for file_name, review in file_reviews.items():
                 future = loop.run_in_executor(
-                    executor,
-                    self.__add_file_info,
-                    repo_id, file_name, review
+                    executor, self.__add_file_info, repo_id, file_name, review
                 )
                 futures.append(future)
 
             await asyncio.gather(*futures)
 
-    def __add_file_info(self, repo_id: str, file_name:str, review: FileReview):
+    def __add_file_info(self, repo_id: str, file_name: str, review: FileReview):
         with self.__supabase_client_lock:
             file_info_table_client = FileInfoTableClient(repo_id)
 
             file_info_table_client.add_file_info(
-                FileInfo(
-                    file_name=file_name,
-                    repo_id=repo_id,
-                    file_review=review
-                )
+                FileInfo(file_name=file_name, repo_id=repo_id, file_review=review)
             )
 
     def add_overall_review_to_db(self, repo_id, review):
         self.__repository_table_client.update_repository(
-            data=Repository(overall_summary=review),
-            repo_id=repo_id
+            data=Repository(overall_summary=review), repo_id=repo_id
         )

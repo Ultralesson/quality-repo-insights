@@ -36,9 +36,7 @@ class LocalRepoTraverser(Traverser):
 
         def should_ignore_ignored_patterns_from_list(path: str, files: list):
             return [
-                item
-                for item in files
-                if not should_ignore(os.path.join(path, item))
+                item for item in files if not should_ignore(os.path.join(path, item))
             ]
 
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -50,8 +48,12 @@ class LocalRepoTraverser(Traverser):
                     dir_names[:] = []
                     continue
 
-                dir_names[:] = should_ignore_ignored_patterns_from_list(dir_path, dir_names)
-                file_names[:] = should_ignore_ignored_patterns_from_list(dir_path, file_names)
+                dir_names[:] = should_ignore_ignored_patterns_from_list(
+                    dir_path, dir_names
+                )
+                file_names[:] = should_ignore_ignored_patterns_from_list(
+                    dir_path, file_names
+                )
 
                 for file_name in file_names:
                     future = loop.run_in_executor(
