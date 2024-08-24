@@ -1,11 +1,14 @@
 import asyncio
 
 from dotenv import load_dotenv, find_dotenv
+from langchain_openai import ChatOpenAI
 
-from handlers import UserRepoInfoHandler
-from handlers.review_formatter.md_review_formatter import MDReviewFormatter
-from handlers.review_handler import ReviewHandler
-from handlers.review_lookup_handler import ReviewLookupHandler
+from components.formatters import MDOutputFormatter
+from components.handlers import (
+    ReviewHandler,
+    ReviewLookupHandler,
+    UserRepoInfoHandler
+)
 
 load_dotenv(find_dotenv())
 
@@ -17,10 +20,16 @@ async def main():
     if review_lookup_handler.review_exists(repo_info.repo_path):
         overall_summary, file_reviews = ReviewLookupHandler().get_review(repo_info)
     else:
-        overall_summary, file_reviews = await ReviewHandler().review_repo(repo_info)
+        review = await ReviewHandler(
+            llm=ChatOpenAI(model="gpt-4o-mini", temperature=0.7),
+            repo_info=repo_info
+        ).analyze()
+
+        overall_summary = review["summary"]
+        file_reviews = review['file_reviews']
 
     # Generate Output
-    review_to_md = MDReviewFormatter(repo_info.name)
+    review_to_md = MDOutputFormatter(repo_info.name)
     await review_to_md.create_file_review_md_files(file_reviews)
     review_to_md.create_overall_summary_md_file(overall_summary)
 

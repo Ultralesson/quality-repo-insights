@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 langchain = "*"
 openai = "*"
-tiktoken = "*"
 langchain-openai = "*"
 python-dotenv = "*"
 supabase = "*"
@@ -14,6 +13,7 @@ pygithub = "*"
 langchain-community = "*"
 requests = "*"
 gitpython = "*"
+langgraph = "*"
 
 [dev-packages]
 
